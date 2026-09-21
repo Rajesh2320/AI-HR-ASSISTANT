@@ -359,13 +359,18 @@
       <!-- Bulk Upload Form (HR only) -->
       <form id="bulkForm" class="form-section" onsubmit="handleBulkSubmit(event)">
         <div class="form-group">
-          <label for="bFile">CSV File *</label>
-          <input type="file" id="bFile" name="csvFile" accept=".csv" required>
-          <small style="color: #6b7280; display: block; margin-top: 6px;">Format: email,name,phone,resume_file_path</small>
+          <label for="bFiles">Resume Files (PDF, DOCX, TXT) *</label>
+          <input type="file" id="bFiles" name="resumeFiles" accept=".pdf,.docx,.txt,.doc" multiple required>
+          <small style="color: #6b7280; display: block; margin-top: 6px;">Select multiple resume files to upload</small>
+        </div>
+
+        <div id="bulkCandidates" style="margin-top: 20px; display: none;">
+          <h3 style="margin-bottom: 12px;">Enter candidate details for each resume:</h3>
+          <div id="candidatesList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-submit" id="bulkSubmitBtn">Process Batch</button>
+          <button type="submit" class="btn-submit" id="bulkSubmitBtn">Upload & Score All</button>
           <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
         </div>
 
@@ -524,9 +529,148 @@
       }
     }
 
-    function handleBulkSubmit(e) {
+    // Handle file selection for bulk upload
+    document.addEventListener('DOMContentLoaded', function() {
+      const bFilesInput = document.getElementById('bFiles');
+      if (bFilesInput) {
+        bFilesInput.addEventListener('change', function() {
+          const files = this.files;
+          const candidatesList = document.getElementById('candidatesList');
+          const bulkCandidates = document.getElementById('bulkCandidates');
+
+          if (files.length === 0) {
+            bulkCandidates.style.display = 'none';
+            return;
+          }
+
+          bulkCandidates.style.display = 'block';
+          candidatesList.innerHTML = '';
+
+          for (let i = 0; i < files.length; i++) {
+            const fileName = files[i].name;
+            const div = document.createElement('div');
+            div.style.cssText = 'border: 1px solid #e5e7eb; padding: 12px; margin-bottom: 12px; border-radius: 6px; background: #f9fafb;';
+            div.innerHTML = `
+              <div style="font-weight: 500; margin-bottom: 8px;">${escapeHtml(fileName)}</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <input type="email" placeholder="Email" class="bulk-email-${i}" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px;" required>
+                </div>
+                <div>
+                  <input type="text" placeholder="Name" class="bulk-name-${i}" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px;" required>
+                </div>
+                <div style="grid-column: 1 / -1;">
+                  <input type="tel" placeholder="Phone (optional)" class="bulk-phone-${i}" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px;">
+                </div>
+              </div>
+            `;
+            candidatesList.appendChild(div);
+          }
+        });
+      }
+    });
+
+    async function handleBulkSubmit(e) {
       e.preventDefault();
-      document.getElementById('bulkMessage').innerHTML = '<div class="message show loading">Bulk upload coming soon</div>';
+      const files = document.getElementById('bFiles').files;
+      const msg = document.getElementById('bulkMessage');
+      const btn = document.getElementById('bulkSubmitBtn');
+
+      if (files.length === 0) {
+        showMsg(msg, 'Please select at least one resume file', 'error');
+        return;
+      }
+
+      showMsg(msg, 'Processing ' + files.length + ' resumes...', 'loading');
+      btn.disabled = true;
+
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const email = document.querySelector('.bulk-email-' + i).value;
+          const name = document.querySelector('.bulk-name-' + i).value;
+          const phone = document.querySelector('.bulk-phone-' + i).value || '';
+
+          if (!email || !name) {
+            errors.push(file.name + ' - Missing email or name');
+            errorCount++;
+            continue;
+          }
+
+          try {
+            // Check duplicate
+            const check = await fetch(SUPABASE_URL + '/rest/v1/candidates?email=eq.' + encodeURIComponent(email) + '&job_id=eq.' + currentJobId + '&select=id', {
+              headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+            });
+            const existing = await check.json();
+            if (existing.length > 0) {
+              errors.push(file.name + ' - Email already applied for this position');
+              errorCount++;
+              continue;
+            }
+
+            // Convert file
+            const b64 = await toBase64(file);
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            const conv = await fetch(CONVERTER_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fileData: b64, filename: file.name, fileType: fileExt })
+            });
+
+            if (!conv.ok) {
+              const convErr = await conv.json();
+              errors.push(file.name + ' - Conversion failed: ' + (convErr.error || 'Unknown error'));
+              errorCount++;
+              continue;
+            }
+
+            const convData = await conv.json();
+            const text = convData.text || '';
+
+            // Score
+            const score = await fetch(SCORER_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+              body: JSON.stringify({
+                resumeText: text,
+                email: email,
+                name: name,
+                phone: phone,
+                jobId: currentJobId
+              })
+            });
+
+            if (!score.ok) {
+              const scoreErr = await score.json();
+              errors.push(file.name + ' - Scoring failed: ' + (scoreErr.error || 'Unknown error'));
+              errorCount++;
+              continue;
+            }
+
+            successCount++;
+          } catch (err) {
+            errors.push(file.name + ' - ' + err.message);
+            errorCount++;
+          }
+        }
+
+        const summary = 'Completed: ' + successCount + ' uploaded, ' + errorCount + ' failed';
+        if (errorCount > 0) {
+          showMsg(msg, summary + '. Errors: ' + errors.slice(0, 3).join('; '), 'error');
+        } else {
+          showMsg(msg, 'Success! All ' + successCount + ' resumes processed.', 'success');
+          setTimeout(function() { closeModal(); loadJobs(); }, 2000);
+        }
+      } catch (err) {
+        showMsg(msg, 'Error: ' + err.message, 'error');
+      }
+
+      btn.disabled = false;
     }
 
     function showMsg(el, txt, type) {
