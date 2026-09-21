@@ -252,10 +252,12 @@
         log('Base64 length: ' + b64.length);
 
         log('Sending to converter: ' + CONVERTER_URL);
+        const fileExt = file.name.split('.').pop().toLowerCase();
+        log('File extension: ' + fileExt);
         const conv = await fetch(CONVERTER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileData: b64, filename: file.name })
+          body: JSON.stringify({ fileData: b64, filename: file.name, fileType: fileExt })
         });
         
         if (!conv.ok) {
