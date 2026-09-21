@@ -10,280 +10,45 @@
       --text-color: #1f2937;
       --bg-color: #f9fafb;
       --border-color: #e5e7eb;
-      --shadow: 0 1px 3px rgba(0,0,0,0.1);
-      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      line-height: 1.6;
     }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 60px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    header { text-align: center; margin-bottom: 60px; display: flex; justify-content: space-between; align-items: center; }
     header .title-section { flex: 1; text-align: center; }
-    header h1 {
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--primary-color);
-    }
+    header h1 { font-size: 36px; font-weight: 700; margin-bottom: 8px; color: var(--primary-color); }
     .subtitle { font-size: 16px; color: #6b7280; }
     header .header-actions { display: flex; gap: 12px; }
-    header button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      font-size: 14px;
-      background-color: var(--primary-color);
-      color: white;
-      transition: all 0.3s;
-    }
-    header button:hover { background-color: #2563eb; }
-    .btn-dashboard { background-color: #10b981; }
-    .btn-dashboard:hover { background-color: #059669; }
-    .btn-logout { background-color: #6b7280; }
-    .btn-logout:hover { background-color: #4b5563; }
-    .jobs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 24px;
-    }
-    .job-card {
-      background: white;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.3s;
-    }
-    .job-card:hover {
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-4px);
-    }
-    .job-card h2 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--text-color);
-    }
-    .job-card .description {
-      font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 16px;
-      flex: 1;
-    }
-    .job-card .requirements {
-      font-size: 13px;
-      color: #6b7280;
-      background: var(--bg-color);
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      border-left: 3px solid var(--primary-color);
-    }
-    .job-card button {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s;
-    }
-    .job-card button:hover {
-      background-color: #2563eb;
-      transform: translateY(-2px);
-    }
-    .loading { text-align: center; padding: 60px 20px; color: #6b7280; }
-    .spinner {
-      border: 4px solid var(--border-color);
-      border-top: 4px solid var(--primary-color);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .status-badge {
-      display: inline-block;
-      background-color: #d1fae5;
-      color: #065f46;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.4);
-      align-items: center;
-      justify-content: center;
-    }
+    header button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; background-color: var(--primary-color); color: white; }
+    .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
+    .job-card { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; display: flex; flex-direction: column; }
+    .job-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+    .job-card .description { font-size: 14px; color: #6b7280; margin-bottom: 16px; flex: 1; }
+    .job-card button { background-color: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+    .status-badge { display: inline-block; background-color: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content {
-      background-color: white;
-      padding: 32px;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-lg);
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 16px;
-    }
-    .modal-header h2 { font-size: 24px; color: var(--text-color); }
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 32px;
-      cursor: pointer;
-      color: #6b7280;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: var(--text-color);
-      font-size: 14px;
-    }
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 14px;
-      font-family: inherit;
-    }
-    .form-group input:focus, .form-group textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    .upload-tabs {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid var(--border-color);
-    }
-    .upload-tabs button {
-      padding: 12px 24px;
-      border: none;
-      background: none;
-      color: #6b7280;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 14px;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.3s;
-    }
-    .upload-tabs button.active {
-      color: var(--primary-color);
-      border-bottom-color: var(--primary-color);
-    }
-    .form-section { display: none; }
-    .form-section.active { display: block; }
-    .form-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-    .form-actions button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .btn-submit {
-      background-color: var(--primary-color);
-      color: white;
-    }
-    .btn-submit:hover:not(:disabled) {
-      background-color: #2563eb;
-      transform: translateY(-2px);
-    }
-    .btn-submit:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-    }
-    .btn-cancel {
-      background-color: #6b7280;
-      color: white;
-    }
-    .btn-cancel:hover { background-color: #4b5563; }
-    .message {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      display: none;
-    }
+    .modal-content { background-color: white; padding: 32px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+    .close-btn { background: none; border: none; font-size: 32px; cursor: pointer; color: #6b7280; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-color); font-size: 14px; }
+    .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; font-family: inherit; }
+    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .form-actions button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; }
+    .btn-submit { background-color: var(--primary-color); color: white; }
+    .btn-cancel { background-color: #6b7280; color: white; }
+    .message { margin-top: 16px; padding: 12px; border-radius: 6px; font-size: 14px; display: none; }
     .message.show { display: block; }
-    .message.success {
-      background-color: #d1fae5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-    }
-    .message.error {
-      background-color: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-    .message.loading {
-      background-color: #dbeafe;
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
-    }
-    footer {
-      text-align: center;
-      margin-top: 60px;
-      padding-top: 40px;
-      border-top: 1px solid var(--border-color);
-      color: #9ca3af;
-      font-size: 14px;
-    }
+    .message.success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .message.error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .message.loading { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .debug-log { background-color: #1f2937; color: #10b981; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 12px; margin-top: 16px; max-height: 200px; overflow-y: auto; }
+    footer { text-align: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color); color: #9ca3af; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -295,14 +60,14 @@
       </div>
       <div class="header-actions">
         <button id="loginBtn" onclick="goToLogin()">Login as HR</button>
-        <button id="dashboardBtn" class="btn-dashboard" onclick="goToDashboard()" style="display: none;">View Dashboard</button>
-        <button id="logoutBtn" class="btn-logout" onclick="logout()" style="display: none;">Logout</button>
+        <button id="dashboardBtn" style="display: none;">View Dashboard</button>
+        <button id="logoutBtn" style="display: none;">Logout</button>
       </div>
     </header>
 
     <div id="jobsContainer" class="jobs-grid">
-      <div class="loading">
-        <div class="spinner"></div>
+      <div style="text-align: center; padding: 60px 20px;">
+        <div style="border: 4px solid #3b82f6; border-top: 4px solid #e5e7eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
         <p>Loading positions...</p>
       </div>
     </div>
@@ -312,7 +77,6 @@
     </footer>
   </div>
 
-  <!-- Application Modal -->
   <div id="applicationModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -320,32 +84,25 @@
         <button class="close-btn" onclick="closeModal()">&times;</button>
       </div>
 
-      <!-- Upload Mode Tabs (HR only) -->
-      <div id="uploadTabs" class="upload-tabs" style="display: none;">
-        <button class="active" onclick="switchTab('single')">Single Upload</button>
-        <button onclick="switchTab('bulk')">Bulk Upload</button>
-      </div>
-
-      <!-- Single Upload Form -->
-      <form id="singleForm" class="form-section active" onsubmit="handleSingleSubmit(event)">
+      <form id="applicationForm" onsubmit="handleSubmit(event)">
         <div class="form-group">
-          <label for="sEmail">Email *</label>
-          <input type="email" id="sEmail" name="email" required placeholder="your@email.com">
+          <label for="email">Email *</label>
+          <input type="email" id="email" name="email" required placeholder="your@email.com">
         </div>
 
         <div class="form-group">
-          <label for="sName">Full Name *</label>
-          <input type="text" id="sName" name="fullName" required placeholder="John Doe">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" name="fullName" required placeholder="John Doe">
         </div>
 
         <div class="form-group">
-          <label for="sPhone">Phone Number</label>
-          <input type="tel" id="sPhone" name="phone" placeholder="+1 (555) 123-4567">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
         </div>
 
         <div class="form-group">
-          <label for="sResume">Resume (PDF, DOCX, or TXT) *</label>
-          <input type="file" id="sResume" name="resume" accept=".pdf,.docx,.txt" required>
+          <label for="resume">Resume (PDF, DOCX, or TXT) *</label>
+          <input type="file" id="resume" name="resume" accept=".pdf,.docx,.txt" required>
         </div>
 
         <div class="form-actions">
@@ -353,23 +110,8 @@
           <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
         </div>
 
-        <div id="singleMessage" class="message"></div>
-      </form>
-
-      <!-- Bulk Upload Form (HR only) -->
-      <form id="bulkForm" class="form-section" onsubmit="handleBulkSubmit(event)">
-        <div class="form-group">
-          <label for="bFile">CSV File *</label>
-          <input type="file" id="bFile" name="csvFile" accept=".csv" required>
-          <small style="color: #6b7280; display: block; margin-top: 6px;">Format: email,name,phone,resume_file_path</small>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-submit" id="bulkSubmitBtn">Process Batch</button>
-          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-        </div>
-
-        <div id="bulkMessage" class="message"></div>
+        <div id="message" class="message"></div>
+        <div id="debugLog" class="debug-log" style="display: none;"></div>
       </form>
     </div>
   </div>
@@ -381,6 +123,17 @@
     const SCORER_URL = SUPABASE_URL + '/functions/v1/score-resume';
 
     let currentJobId = null;
+    let debugMessages = [];
+
+    function log(msg) {
+      console.log(msg);
+      debugMessages.push(msg);
+      const debugEl = document.getElementById('debugLog');
+      if (debugEl) {
+        debugEl.textContent = debugMessages.join('\n');
+        debugEl.scrollTop = debugEl.scrollHeight;
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', function() {
       updateUI();
@@ -392,11 +145,11 @@
       document.getElementById('loginBtn').style.display = isHR ? 'none' : 'block';
       document.getElementById('dashboardBtn').style.display = isHR ? 'block' : 'none';
       document.getElementById('logoutBtn').style.display = isHR ? 'block' : 'none';
-      document.getElementById('uploadTabs').style.display = isHR ? 'flex' : 'none';
     }
 
     async function loadJobs() {
       try {
+        log('Fetching jobs from Supabase...');
         const res = await fetch(SUPABASE_URL + '/rest/v1/jobs?select=*&order=created_at.desc', {
           headers: {
             'apikey': SUPABASE_KEY,
@@ -404,8 +157,13 @@
           }
         });
 
-        if (!res.ok) throw new Error('Failed to load jobs');
+        if (!res.ok) {
+          log('ERROR loading jobs: ' + res.status + ' ' + res.statusText);
+          throw new Error('Failed to load jobs');
+        }
+        
         const jobs = await res.json();
+        log('Successfully loaded ' + jobs.length + ' jobs');
 
         if (jobs.length === 0) {
           document.getElementById('jobsContainer').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;"><p>No open positions available.</p></div>';
@@ -414,7 +172,7 @@
 
         renderJobs(jobs);
       } catch (e) {
-        console.error('Error:', e);
+        log('Exception: ' + e.message);
         document.getElementById('jobsContainer').innerHTML = '<div style="grid-column: 1/-1;"><div style="color: #ef4444; background: #fee2e2; padding: 16px; border-radius: 8px;">Error: ' + e.message + '</div></div>';
       }
     }
@@ -425,113 +183,153 @@
       jobs.forEach(function(job) {
         const div = document.createElement('div');
         div.className = 'job-card';
-        div.innerHTML = '<div class="status-badge">Open</div><h2>' + escapeHtml(job.title) + '</h2><div class="description">' + escapeHtml(job.description) + '</div><div class="requirements"><strong>Requirements:</strong>' + escapeHtml(job.requirements) + '</div><button onclick="openModal(\'' + job.id + '\', \'' + escapeHtml(job.title) + '\')">Apply</button>';
+        div.innerHTML = '<div class="status-badge">Open</div><h2>' + job.title + '</h2><div class="description">' + job.description + '</div><div class="requirements"><strong>Requirements:</strong>' + job.requirements + '</div><button onclick="openModal(\'' + job.id + '\', \'' + job.title + '\')">Apply</button>';
         container.appendChild(div);
       });
     }
 
     function openModal(jobId, jobTitle) {
       currentJobId = jobId;
+      debugMessages = [];
       document.getElementById('modalJobTitle').textContent = 'Apply for ' + jobTitle;
-      document.getElementById('singleForm').reset();
-      document.getElementById('bulkForm').reset();
-      document.getElementById('singleMessage').innerHTML = '';
-      document.getElementById('bulkMessage').innerHTML = '';
-      switchTab('single');
+      document.getElementById('applicationForm').reset();
+      document.getElementById('message').innerHTML = '';
+      document.getElementById('debugLog').style.display = 'block';
       document.getElementById('applicationModal').classList.add('active');
+      log('Modal opened for job: ' + jobId);
     }
 
     function closeModal() {
       document.getElementById('applicationModal').classList.remove('active');
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.form-section').forEach(function(el) { el.classList.remove('active'); });
-      document.querySelectorAll('.upload-tabs button').forEach(function(el) { el.classList.remove('active'); });
-      
-      if (tab === 'single') {
-        document.getElementById('singleForm').classList.add('active');
-        document.querySelector('.upload-tabs button:first-child').classList.add('active');
-      } else {
-        document.getElementById('bulkForm').classList.add('active');
-        document.querySelector('.upload-tabs button:last-child').classList.add('active');
-      }
-    }
-
-    async function handleSingleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
-      const email = document.getElementById('sEmail').value;
-      const name = document.getElementById('sName').value;
-      const phone = document.getElementById('sPhone').value;
-      const file = document.getElementById('sResume').files[0];
-      const msg = document.getElementById('singleMessage');
+      debugMessages = [];
+      document.getElementById('debugLog').style.display = 'block';
+      
+      const email = document.getElementById('email').value;
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const file = document.getElementById('resume').files[0];
+      const msg = document.getElementById('message');
       const btn = document.getElementById('submitBtn');
 
       if (!file) {
         showMsg(msg, 'Please select a file', 'error');
+        log('ERROR: No file selected');
         return;
       }
 
+      log('Starting upload for: ' + email);
+      log('File: ' + file.name + ' (' + file.size + ' bytes)');
+
       try {
         // Check duplicate
+        log('Checking for duplicate email...');
         const check = await fetch(SUPABASE_URL + '/rest/v1/candidates?email=eq.' + encodeURIComponent(email) + '&job_id=eq.' + currentJobId + '&select=id', {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
         });
-        const existing = await check.json();
-        if (existing.length > 0) {
-          showMsg(msg, 'You already applied for this position', 'error');
-          return;
+        
+        if (!check.ok) {
+          log('WARNING: Duplicate check failed with ' + check.status);
+        } else {
+          const existing = await check.json();
+          if (existing.length > 0) {
+            showMsg(msg, 'You already applied for this position', 'error');
+            log('ERROR: Duplicate application detected');
+            return;
+          }
+          log('OK: No duplicate found');
         }
 
-        showMsg(msg, 'Processing...', 'loading');
+        showMsg(msg, 'Processing your application...', 'loading');
         btn.disabled = true;
 
         // Convert
+        log('Converting file to base64...');
         const b64 = await toBase64(file);
+        log('Base64 length: ' + b64.length);
+
+        log('Sending to converter: ' + CONVERTER_URL);
         const conv = await fetch(CONVERTER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fileData: b64, filename: file.name })
         });
+        
+        if (!conv.ok) {
+          log('ERROR: Converter returned ' + conv.status);
+          const errText = await conv.text();
+          log('Response: ' + errText);
+          throw new Error('Converter error: ' + conv.status);
+        }
+
         const convData = await conv.json();
+        log('Converter success, text length: ' + (convData.text ? convData.text.length : 0));
         const text = convData.text || '';
 
         // Score
+        log('Scoring resume...');
+        log('Sending to: ' + SCORER_URL);
+        const scoreReq = {
+          resume_text: text,
+          job_id: currentJobId
+        };
+        log('Request body: ' + JSON.stringify(scoreReq));
+
         const score = await fetch(SCORER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
-          body: JSON.stringify({ resume_text: text, job_id: currentJobId })
+          body: JSON.stringify(scoreReq)
         });
+
+        if (!score.ok) {
+          log('ERROR: Score function returned ' + score.status);
+          const scoreErr = await score.text();
+          log('Response: ' + scoreErr);
+          throw new Error('Scoring error: ' + score.status);
+        }
+
         const scoreData = await score.json();
         const points = scoreData.score || 0;
+        log('Score received: ' + points);
 
         // Save
-        await fetch(SUPABASE_URL + '/rest/v1/candidates', {
+        log('Saving to database...');
+        const saveReq = {
+          job_id: currentJobId,
+          email: email,
+          name: name,
+          phone: phone,
+          resume_text: text,
+          score: points,
+          created_at: new Date().toISOString()
+        };
+        log('Save request: ' + JSON.stringify(saveReq));
+
+        const save = await fetch(SUPABASE_URL + '/rest/v1/candidates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
-          body: JSON.stringify({
-            job_id: currentJobId,
-            email: email,
-            name: name,
-            phone: phone,
-            resume_text: text,
-            score: points,
-            created_at: new Date().toISOString()
-          })
+          body: JSON.stringify(saveReq)
         });
 
+        if (!save.ok) {
+          log('ERROR: Save returned ' + save.status);
+          const saveErr = await save.text();
+          log('Response: ' + saveErr);
+          throw new Error('Save error: ' + save.status);
+        }
+
+        log('SUCCESS: Application saved!');
         showMsg(msg, 'Success! Score: ' + points + '/100', 'success');
         btn.disabled = false;
         setTimeout(function() { closeModal(); loadJobs(); }, 2000);
       } catch (err) {
+        log('EXCEPTION: ' + err.message);
         showMsg(msg, 'Error: ' + err.message, 'error');
         btn.disabled = false;
       }
-    }
-
-    function handleBulkSubmit(e) {
-      e.preventDefault();
-      document.getElementById('bulkMessage').innerHTML = '<div class="message show loading">Bulk upload coming soon</div>';
     }
 
     function showMsg(el, txt, type) {
@@ -546,19 +344,12 @@
           const b64 = reader.result.split(',')[1] || reader.result;
           res(b64);
         };
-        reader.onerror = function() { rej(new Error('Failed to read file')); };
+        reader.onerror = function() { rej(new Error('File read error')); };
         reader.readAsDataURL(file);
       });
     }
 
-    function escapeHtml(txt) {
-      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-      return txt.replace(/[&<>"']/g, function(m) { return map[m]; });
-    }
-
     function goToLogin() { window.location.href = 'login.html'; }
-    function goToDashboard() { window.location.href = 'hr-dashboard.html'; }
-    function logout() { localStorage.removeItem('hrUser'); updateUI(); loadJobs(); }
   </script>
 </body>
 </html>
