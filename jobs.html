@@ -199,7 +199,7 @@
   <script>
     // Configuration
     const SUPABASE_URL = 'https://cwtkhsphaykebnqqqwcf.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3dGtoc3BoYXlrZWJucXFxd2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NzM4MzgsImV4cCI6MjEwNTU0OTgzOH0.Kia5M7o9BqmO5OgzxXBxeE2--2p4nI_BflXnEORJpgY';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
     // Initialize Supabase
     let supabase;
@@ -208,8 +208,17 @@
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
     script.onload = () => {
+      if (!window.supabase) {
+        console.error('Supabase library failed to load');
+        document.getElementById('jobsContainer').innerHTML = '<div class="loading"><p style="color: red;">Failed to load Supabase. Please refresh the page.</p></div>';
+        return;
+      }
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       loadJobs();
+    };
+    script.onerror = () => {
+      console.error('Failed to load Supabase script');
+      document.getElementById('jobsContainer').innerHTML = '<div class="loading"><p style="color: red;">Failed to load required libraries. Please refresh the page.</p></div>';
     };
     document.head.appendChild(script);
 
