@@ -275,8 +275,8 @@
         log('Scoring resume...');
         log('Sending to: ' + SCORER_URL);
         const scoreReq = {
-          resume_text: text,
-          job_id: currentJobId
+          resume: text,
+          jobId: currentJobId
         };
         log('Request body: ' + JSON.stringify(scoreReq));
 
