@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Positions - AI HR Assistant</title>
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --text-color: #1f2937;
+      --bg-color: #f9fafb;
+      --border-color: #e5e7eb;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .title-section { flex: 1; text-align: center; }
+    header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--primary-color);
+    }
+    .subtitle { font-size: 16px; color: #6b7280; }
+    header .header-actions { display: flex; gap: 12px; }
+    header button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 14px;
+      background-color: var(--primary-color);
+      color: white;
+      transition: all 0.3s;
+    }
+    header button:hover { background-color: #2563eb; }
+    header .btn-dashboard { background-color: #10b981; }
+    header .btn-dashboard:hover { background-color: #059669; }
+    header .btn-logout { background-color: #ef4444; }
+    header .btn-logout:hover { background-color: #dc2626; }
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .job-card {
+      background: white;
+      padding: 20px 24px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-left: 4px solid var(--primary-color);
+    }
+    .job-card:hover { box-shadow: var(--shadow-lg); transform: translateX(4px); }
+    .job-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .job-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .job-card-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-left: 24px;
+      flex-shrink: 0;
+    }
+    .status-badge {
+      position: static;
+      background-color: #dcfce7;
+      color: #15803d;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .job-code {
+      display: inline-block;
+      background-color: #dbeafe;
+      color: #0c4a6e;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .job-card h2 {
+      font-size: 16px;
+      margin: 0;
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .description {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0;
+      max-width: 500px;
+    }
+    .requirements {
+      font-size: 12px;
+      color: #9ca3af;
+      margin: 0;
+    }
+    .job-card button {
+      padding: 10px 24px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    .job-card button:hover { background-color: #2563eb; }
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 768px) {
+      .job-card {
+        flex-direction: column;
+        align-items: flex-start;
+        border-left: none;
+        border-top: 4px solid var(--primary-color);
+      }
+      .job-card-actions {
+        margin-left: 0;
+        margin-top: 12px;
+        width: 100%;
+      }
+      .job-card-actions button {
+        width: 100%;
+      }
+      .job-card-header {
+        width: 100%;
+        flex-direction: row;
+      }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .modal-header h2 { font-size: 20px; color: var(--primary-color); }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #9ca3af;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .upload-tabs button {
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 500;
+      color: #6b7280;
+      transition: all 0.3s;
+    }
+    .upload-tabs button.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+    .form-section {
+      display: none;
+    }
+    .form-section.active { display: block; }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-color);
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn-submit, .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-submit {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-submit:hover { background-color: #2563eb; }
+    .btn-submit:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+    .btn-cancel {
+      background-color: #e5e7eb;
+      color: var(--text-color);
+    }
+    .btn-cancel:hover { background-color: #d1d5db; }
+    .message {
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+      margin-bottom: 16px;
+      border-left: 4px solid;
+    }
+    .message.show { display: block; }
+    .message.success {
+      background-color: #d1fae5;
+      color: #065f46;
+      border-color: #6ee7b7;
+    }
+    .message.error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border-color: #fca5a5;
+    }
+    .message.loading {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border-color: #93c5fd;
+    }
+    #bulkCandidates {
+      background-color: #f3f4f6;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    .candidate-item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border-left: 4px solid var(--primary-color);
+    }
+    .candidate-item.error { border-left-color: #ef4444; }
+    .candidate-filename { font-weight: 600; margin-bottom: 8px; color: var(--text-color); }
+    .candidate-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .candidate-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-view-resume {
+      padding: 6px 12px;
+      font-size: 13px;
+      background-color: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-view-resume:hover { background-color: #d97706; }
+    .resume-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .resume-modal.active { display: flex; }
+    .resume-modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      max-width: 900px;
+      width: 90%;
+      max-height: 85vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      box-shadow: var(--shadow-lg);
+    }
+    .resume-preview {
+      display: flex;
+      flex-direction: column;
+    }
+    .resume-preview h3 {
+      margin-bottom: 12px;
+      color: var(--primary-color);
+      font-size: 16px;
+    }
+    .resume-text {
+      flex: 1;
+      background-color: #f9fafb;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #374151;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .resume-form {
+      display: flex;
+      flex-direction: column;
+    }
+    .resume-form h3 {
+      margin-bottom: 12px;
+      color: var(--primary-color);
+      font-size: 16px;
+    }
+    .resume-form-fields {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .resume-form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .resume-form-group label {
+      font-weight: 500;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+    .resume-form-group input {
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .resume-form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+    .resume-form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-save-resume, .btn-cancel-resume {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 13px;
+    }
+    .btn-save-resume {
+      background-color: #10b981;
+      color: white;
+    }
+    .btn-save-resume:hover { background-color: #059669; }
+    .btn-cancel-resume {
+      background-color: #e5e7eb;
+      color: var(--text-color);
+    }
+    .btn-cancel-resume:hover { background-color: #d1d5db; }
+    .progress-section {
+      display: none;
+      margin-bottom: 20px;
+      padding: 16px;
+      background-color: #f0f9ff;
+      border-radius: 6px;
+      border: 1px solid #bfdbfe;
+    }
+    .progress-section.show { display: block; }
+    .progress-counter {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e5e7eb;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .progress-timer {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: var(--primary-color);
+      transition: width 0.3s;
+    }
+    .summary-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+    }
+    .summary-modal.active { display: flex; }
+    .summary-modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .summary-header {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    .summary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .stat-box.success {
+      background-color: #d1fae5;
+      border-left: 4px solid #10b981;
+    }
+    .stat-box.error {
+      background-color: #fee2e2;
+      border-left: 4px solid #ef4444;
+    }
+    .stat-box.info {
+      background-color: #dbeafe;
+      border-left: 4px solid var(--primary-color);
+    }
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: inherit;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: inherit;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+    .failed-section {
+      margin-top: 20px;
+    }
+    .failed-section h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ef4444;
+      margin-bottom: 12px;
+    }
+    .failed-item {
+      padding: 8px 12px;
+      background-color: #fef2f2;
+      border-left: 3px solid #ef4444;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #7f1d1d;
+    }
+    .summary-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn-close-summary, .btn-retry-failed {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-close-summary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-close-summary:hover { background-color: #2563eb; }
+    .btn-retry-failed {
+      background-color: #f59e0b;
+      color: white;
+    }
+    .btn-retry-failed:hover { background-color: #d97706; }
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border-color);
+      color: #9ca3af;
+      font-size: 14px;
+    }
+  </style>
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-section">
+        <h1>Open Positions</h1>
+        <p class="subtitle">Find your next opportunity</p>
+      </div>
+      <div class="header-actions">
+        <button id="loginBtn" onclick="goToLogin()">Login as HR</button>
+        <button id="dashboardBtn" class="btn-dashboard" onclick="goToDashboard()" style="display: none;">View Dashboard</button>
+        <button id="logoutBtn" class="btn-logout" onclick="logout()" style="display: none;">Logout</button>
+      </div>
+    </header>
+
+    <div id="jobsContainer" class="jobs-grid">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading positions...</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; 2024 AI HR Assistant. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Application Modal -->
+  <div id="applicationModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalJobTitle">Apply for Position</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+
+      <!-- Upload Mode Tabs (HR only) -->
+      <div id="uploadTabs" class="upload-tabs" style="display: none;">
+        <button class="active" onclick="switchTab('single')">Single Upload</button>
+        <button onclick="switchTab('bulk')">Bulk Upload</button>
+        <button style="background: #f59e0b; color: white; border: none; margin-left: auto;" onclick="viewRejectedResumes()">📋 View Rejected</button>
+      </div>
+
+      <!-- Single Upload Form -->
+      <form id="singleForm" class="form-section active" onsubmit="handleSingleSubmit(event)">
+        <div class="form-group">
+          <label for="sEmail">Email *</label>
+          <input type="email" id="sEmail" name="email" required placeholder="your@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="sName">Full Name *</label>
+          <input type="text" id="sName" name="fullName" required placeholder="John Doe">
+        </div>
+
+        <div class="form-group">
+          <label for="sPhone">Phone</label>
+          <input type="tel" id="sPhone" name="phone" placeholder="+1 (555) 123-4567">
+        </div>
+
+        <div class="form-group">
+          <label for="sResume">Resume (PDF, DOCX, or TXT) *</label>
+          <input type="file" id="sResume" name="resume" accept=".pdf,.docx,.txt" required>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit" id="submitBtn">Submit Application</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+
+        <div id="singleMessage" class="message"></div>
+      </form>
+
+      <!-- Bulk Upload Form (HR only) -->
+      <form id="bulkForm" class="form-section" onsubmit="handleBulkSubmit(event)">
+        <div class="form-group">
+          <label for="bFiles">Resume Files (PDF, DOCX, TXT) *</label>
+          <input type="file" id="bFiles" name="resumeFiles" accept=".pdf,.docx,.txt,.doc" multiple required>
+          <small style="color: #6b7280; display: block; margin-top: 6px;">System will auto-extract candidate info. Name & Email required.</small>
+        </div>
+
+        <div id="bulkCandidates" style="display: none;">
+          <h3 style="margin-bottom: 12px; color: var(--text-color);">Review & edit candidate details:</h3>
+          <div id="candidatesList"></div>
+        </div>
+
+        <!-- Progress Section (shown during extraction and scoring) -->
+        <div id="bulkProgress" class="progress-section">
+          <div class="progress-counter">
+            <div class="mini-spinner"></div>
+            <span id="progressCounter">Processing 0/0...</span>
+          </div>
+          <div class="progress-timer" id="progressTimer">00:00 elapsed</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div id="bulkMessage" class="message"></div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit" id="bulkSubmitBtn">Upload & Score All</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Upload Summary Modal -->
+  <div id="summaryModal" class="summary-modal" onclick="event.target === this && closeSummaryModal()">
+    <div class="summary-modal-content">
+      <div class="summary-header">📊 Upload Summary</div>
+
+      <div class="summary-stats">
+        <div class="stat-box success">
+          <div class="stat-number" id="statSuccess">0</div>
+          <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-box error">
+          <div class="stat-number" id="statFailed">0</div>
+          <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat-box info">
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+
+      <div style="padding: 12px; background-color: #f3f4f6; border-radius: 6px; margin-bottom: 16px;">
+        <div style="font-size: 13px; color: #6b7280;">
+          ⏱️ Processing time: <strong id="summaryTime">00:00</strong>
+        </div>
+      </div>
+
+      <div id="failedResumes"></div>
+
+      <div class="summary-actions">
+        <button type="button" class="btn-close-summary" onclick="closeSummaryAndReload()">Close & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resume Preview Modal -->
+  <div id="resumeModal" class="resume-modal" onclick="event.target === this && closeResumeModal()">
+    <div class="resume-modal-content">
+      <!-- Resume Text Preview -->
+      <div class="resume-preview">
+        <h3>📄 Resume Content</h3>
+        <div class="resume-text" id="resumeTextPreview"></div>
+      </div>
+
+      <!-- Form to Complete Missing Fields -->
+      <div class="resume-form">
+        <h3>✏️ Complete Candidate Info</h3>
+        <div class="resume-form-fields">
+          <div class="resume-form-group">
+            <label for="resumeName">Name *</label>
+            <input type="text" id="resumeName" placeholder="Full name" required>
+          </div>
+          <div class="resume-form-group">
+            <label for="resumeEmail">Email *</label>
+            <input type="email" id="resumeEmail" placeholder="Email address" required>
+          </div>
+          <div class="resume-form-group">
+            <label for="resumePhone">Phone</label>
+            <input type="tel" id="resumePhone" placeholder="Phone number (optional)">
+          </div>
+        </div>
+        <div class="resume-form-actions">
+          <button type="button" class="btn-save-resume" onclick="saveResumeData()">Save & Continue</button>
+          <button type="button" class="btn-cancel-resume" onclick="closeResumeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://cwtkhsphaykebnqqqwcf.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3dGtoc3BoYXlrZWJucXFxd2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NzM4MzgsImV4cCI6MjEwNTU0OTgzOH0.Kia5M7o9BqmO5OgzxXBxeE2--2p4nI_BflXnEORJpgY';
+    const CONVERTER_URL = 'https://ai-hr-file-converter-production.up.railway.app/convert';
+
+    // Batch tracking variables
+    let batchCounter = {};
+    let currentBatchData = {
+      successful: [],
+      failed: [],
+      jobCode: '',
+      jobId: '',
+      uploadTime: ''
+    };
+    const SCORER_URL = SUPABASE_URL + '/functions/v1/score-resume';
+    const EXTRACTOR_URL = SUPABASE_URL + '/functions/v1/extract-candidate-info';
+    const FALLBACK_PDF_EXTRACTOR = SUPABASE_URL + '/functions/v1/extract-pdf-fallback';
+
+    let currentJobId = null;
+    let currentJobCode = null;
+    let bulkCandidatesData = {};
+    let currentResumeModalCandidateIndex = null;
+    let processingStartTime = null;
+    let processingTimerInterval = null;
+    let failedResumes = [];
+
+    window.addEventListener('DOMContentLoaded', function() {
+      updateUI();
+      loadJobs();
+      setupBulkFileListener();
+    });
+
+    function updateUI() {
+      const hrUser = localStorage.getItem('hrUser');
+      if (hrUser) {
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('dashboardBtn').style.display = 'block';
+        document.getElementById('logoutBtn').style.display = 'block';
+      } else {
+        document.getElementById('loginBtn').style.display = 'block';
+        document.getElementById('dashboardBtn').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'none';
+      }
+    }
+
+    async function loadJobs() {
+      try {
+        const response = await fetch(SUPABASE_URL + '/rest/v1/jobs?select=*&order=created_at.desc', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const jobs = await response.json();
+        renderJobs(jobs);
+      } catch (err) {
+        document.getElementById('jobsContainer').innerHTML = '<div class="loading"><p>Error loading positions: ' + err.message + '</p></div>';
+      }
+    }
+
+    function renderJobs(jobs) {
+      const container = document.getElementById('jobsContainer');
+      container.innerHTML = '';
+      jobs.forEach(function(job) {
+        const div = document.createElement('div');
+        div.className = 'job-card';
+        div.innerHTML = `
+          <div class="job-card-content">
+            <div class="job-card-header">
+              <div class="job-code">${escapeHtml(job.job_code || 'N/A')}</div>
+              <h2>${escapeHtml(job.title)}</h2>
+              <div class="status-badge">Open</div>
+            </div>
+            <div class="description">${escapeHtml(job.description)}</div>
+            <div class="requirements"><strong>Required:</strong> ${escapeHtml(job.requirements)}</div>
+          </div>
+          <div class="job-card-actions">
+            <button onclick="openModal('${job.id}', '${escapeHtml(job.title)}', '${escapeHtml(job.job_code || '')}')">Apply Now</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openModal(jobId, jobTitle, jobCode) {
+      currentJobId = jobId;
+      currentJobCode = jobCode || 'N/A';
+      const titleText = 'Apply for ' + jobTitle + (jobCode ? ' (' + jobCode + ')' : '');
+      document.getElementById('modalJobTitle').textContent = titleText;
+      document.getElementById('singleForm').reset();
+      document.getElementById('bulkForm').reset();
+      document.getElementById('singleMessage').innerHTML = '';
+      document.getElementById('bulkMessage').innerHTML = '';
+      document.getElementById('uploadTabs').style.display = localStorage.getItem('hrUser') ? 'flex' : 'none';
+      switchTab('single');
+      document.getElementById('applicationModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('applicationModal').classList.remove('active');
+      // Clear bulk data
+      document.getElementById('bFiles').value = '';
+      bulkCandidatesData = {};
+      document.getElementById('bulkCandidates').style.display = 'none';
+      document.getElementById('candidatesList').innerHTML = '';
+      // Clear single form
+      document.getElementById('singleForm').reset();
+      // Clear progress section
+      document.getElementById('bulkProgress').classList.remove('show');
+      document.getElementById('progressFill').style.width = '0%';
+      document.getElementById('progressCounter').textContent = 'Processing 0/0...';
+      // Clear message sections
+      document.getElementById('singleMessage').className = 'message';
+      document.getElementById('bulkMessage').className = 'message';
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.form-section').forEach(function(el) { el.classList.remove('active'); });
+      document.querySelectorAll('.upload-tabs button').forEach(function(el) { el.classList.remove('active'); });
+      if (tab === 'single') {
+        document.getElementById('singleForm').classList.add('active');
+        document.querySelector('.upload-tabs button:first-child').classList.add('active');
+      } else {
+        document.getElementById('bulkForm').classList.add('active');
+        document.querySelector('.upload-tabs button:last-child').classList.add('active');
+      }
+    }
+
+    async function handleSingleSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('sEmail').value;
+      const name = document.getElementById('sName').value;
+      const phone = document.getElementById('sPhone').value;
+      const file = document.getElementById('sResume').files[0];
+      const msg = document.getElementById('singleMessage');
+      const btn = document.getElementById('submitBtn');
+
+      if (!file) {
+        showMsg(msg, 'Please select a file', 'error');
+        return;
+      }
+
+      try {
+        const check = await fetch(SUPABASE_URL + '/rest/v1/candidates?email=eq.' + encodeURIComponent(email) + '&job_id=eq.' + currentJobId + '&select=id', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const existing = await check.json();
+        if (existing.length > 0) {
+          showMsg(msg, 'You already applied for this position', 'error');
+          return;
+        }
+
+        showMsg(msg, 'Processing...', 'loading');
+        btn.disabled = true;
+
+        const b64 = await toBase64(file);
+        const fileExt = file.name.split('.').pop().toLowerCase();
+        const conv = await fetch(CONVERTER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileData: b64, filename: file.name, fileType: fileExt })
+        });
+        const convData = await conv.json();
+        const text = convData.text || '';
+
+        const score = await fetch(SCORER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+          body: JSON.stringify({
+            resumeText: text,
+            email: email,
+            name: name,
+            phone: phone,
+            jobId: currentJobId
+          })
+        });
+        const scoreData = await score.json();
+        const points = scoreData.score || 0;
+
+        showMsg(msg, '✅ Success! Score: ' + points + '/100', 'success');
+        btn.disabled = false;
+        setTimeout(function() { closeModal(); loadJobs(); }, 2000);
+      } catch (err) {
+        showMsg(msg, 'Error: ' + err.message, 'error');
+        btn.disabled = false;
+      }
+    }
+
+    function setupBulkFileListener() {
+      const bFilesInput = document.getElementById('bFiles');
+      bFilesInput.addEventListener('change', async function() {
+        const files = this.files;
+        const candidatesList = document.getElementById('candidatesList');
+        const bulkCandidates = document.getElementById('bulkCandidates');
+        const progressSection = document.getElementById('bulkProgress');
+
+        if (files.length === 0) {
+          bulkCandidates.style.display = 'none';
+          return;
+        }
+
+        bulkCandidates.style.display = 'block';
+        candidatesList.innerHTML = '';
+        bulkCandidatesData = {};
+
+        // Show progress section during extraction
+        progressSection.classList.add('show');
+
+        // Initialize progress
+        processingStartTime = Date.now();
+        processingTimerInterval = setInterval(updateProcessingTimer, 1000);
+        updateProcessingTimer();
+
+        for (let i = 0; i < files.length; i++) {
+          try {
+            const file = files[i];
+            const processed = i + 1;
+
+            // Update progress counter
+            document.getElementById('progressCounter').textContent = 'Extracting ' + processed + '/' + files.length + '...';
+            const progressPercent = (processed / files.length) * 100;
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+
+            const b64 = await toBase64(file);
+            const fileExt = file.name.split('.').pop().toLowerCase();
+
+            // Try conversion with retry logic
+            let conv = null;
+            let lastError = null;
+            let text = '';
+
+            for (let retry = 0; retry < 3; retry++) {
+              try {
+                conv = await fetch(CONVERTER_URL, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ fileData: b64, filename: file.name, fileType: fileExt })
+                });
+
+                if (conv.ok) {
+                  const convData = await conv.json();
+                  text = convData.text || '';
+                  break;
+                }
+
+                const errData = await conv.json().catch(() => ({}));
+                lastError = errData.error || errData.message || 'Conversion failed';
+
+                // Wait before retry (exponential backoff)
+                if (retry < 2) await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
+              } catch (e) {
+                lastError = e.message;
+                if (retry < 2) await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
+              }
+            }
+
+            // Use fallback if Railway converter fails
+            if (!text) {
+              try {
+                console.log('Railway converter failed, trying fallback for: ' + file.name);
+                const fallback = await fetch(FALLBACK_PDF_EXTRACTOR, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+                  body: JSON.stringify({ fileData: b64, filename: file.name })
+                });
+
+                if (!fallback.ok) {
+                  throw new Error('Fallback extraction failed: ' + lastError);
+                }
+
+                const fallbackData = await fallback.json();
+                text = fallbackData.text || '';
+                console.log('Fallback extraction succeeded for: ' + file.name);
+              } catch (fallbackErr) {
+                throw new Error('Could not extract text: ' + (lastError || fallbackErr.message));
+              }
+            }
+
+            const extract = await fetch(EXTRACTOR_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+              body: JSON.stringify({ resumeText: text, filename: file.name })
+            });
+
+            if (!extract.ok) throw new Error('AI extraction failed');
+            const extracted = await extract.json();
+
+            bulkCandidatesData[i] = {
+              name: extracted.name || '',
+              email: extracted.email || '',
+              phone: extracted.phone || '',
+              resumeText: text,
+              filename: file.name,
+              conversionSuccess: true
+            };
+          } catch (err) {
+            bulkCandidatesData[i] = {
+              name: '',
+              email: '',
+              phone: '',
+              resumeText: '',
+              filename: files[i].name,
+              error: err.message,
+              conversionSuccess: false
+            };
+          }
+        }
+
+        // Hide progress section after extraction
+        clearInterval(processingTimerInterval);
+        progressSection.classList.remove('show');
+        renderBulkCandidates();
+      });
+    }
+
+    function renderBulkCandidates() {
+      const candidatesList = document.getElementById('candidatesList');
+      candidatesList.innerHTML = '';
+
+      for (let i = 0; i < Object.keys(bulkCandidatesData).length; i++) {
+        const candidate = bulkCandidatesData[i];
+        const hasError = candidate.error;
+        const conversionFailed = !candidate.conversionSuccess;
+        const missingRequired = !candidate.name || !candidate.email;
+
+        const div = document.createElement('div');
+        div.className = 'candidate-item' + (hasError || missingRequired ? ' error' : '');
+        div.innerHTML = `
+          <div class="candidate-filename">${escapeHtml(candidate.filename)}</div>
+          <div class="candidate-fields">
+            <input type="text" placeholder="Name *" class="bulk-name-${i}" value="${escapeHtml(candidate.name || '')}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            <input type="email" placeholder="Email *" class="bulk-email-${i}" value="${escapeHtml(candidate.email || '')}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px;">
+            <input type="tel" placeholder="Phone" class="bulk-phone-${i}" value="${escapeHtml(candidate.phone || '')}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; grid-column: 1 / -1;">
+          </div>
+          ${conversionFailed ? '<div style="color: #dc2626; font-size: 12px; margin-top: 6px;">❌ ' + escapeHtml(candidate.error) + ' - Please enter details manually below</div>' : ''}
+          ${missingRequired && !hasError ? '<div style="color: #d97706; font-size: 12px; margin-top: 6px;">⚠️ Name & Email required - View resume to fill in</div>' : ''}
+          <div class="candidate-actions">
+            ${candidate.resumeText ? '<button type="button" class="btn-view-resume" onclick="openResumeModal(${i})">📄 View Resume</button>' : '<span style="font-size: 12px; color: #9ca3af; padding: 6px 12px;">Resume text unavailable</span>'}
+          </div>
+        `;
+        candidatesList.appendChild(div);
+      }
+    }
+
+    async function generateBatchId(jobCode) {
+      // Format: BATCH-DDMMYY-###
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = String(today.getFullYear()).slice(-2);
+      const dateStr = day + month + year;
+
+      // Get today's batch count from localStorage
+      const batchKey = 'batch_count_' + dateStr;
+      let count = parseInt(localStorage.getItem(batchKey) || '0', 10);
+      count++;
+      localStorage.setItem(batchKey, String(count));
+
+      const batchNum = String(count).padStart(3, '0');
+      return 'BATCH-' + dateStr + '-' + batchNum;
+    }
+
+    async function generatePDFReport(batchId, jobCode, successfulCandidates, failedCandidates, uploadTime) {
+      try {
+        // Use jsPDF from window.jspdf
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Set fonts and colors
+        const primaryColor = [59, 130, 246]; // #3b82f6
+        const successColor = [22, 163, 74]; // #16a346
+        const failColor = [220, 38, 38]; // #dc2626
+        const textColor = [31, 41, 55]; // #1f2937
+        const lightColor = [107, 114, 128]; // #6b7280
+
+        // Header section
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 15;
+        let yPos = margin;
+
+        // Batch ID and Title
+        doc.setFontSize(18);
+        doc.setTextColor(...primaryColor);
+        doc.text('BATCH UPLOAD REPORT', margin, yPos);
+        yPos += 10;
+
+        // Batch Details
+        doc.setFontSize(10);
+        doc.setTextColor(...textColor);
+        doc.text('Batch ID: ' + batchId, margin, yPos);
+        yPos += 6;
+        doc.text('Job Code: ' + jobCode, margin, yPos);
+        yPos += 6;
+        doc.text('Upload Date & Time: ' + uploadTime, margin, yPos);
+        yPos += 10;
+
+        // Summary Statistics
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text('Summary', margin, yPos);
+        yPos += 6;
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(...successColor);
+        doc.text('✓ Successful: ' + successfulCandidates.length, margin, yPos);
+        yPos += 5;
+        doc.setTextColor(...failColor);
+        doc.text('✗ Failed: ' + failedCandidates.length, margin, yPos);
+        yPos += 5;
+        doc.setTextColor(...textColor);
+        doc.text('Total: ' + (successfulCandidates.length + failedCandidates.length), margin, yPos);
+        yPos += 10;
+
+        // Part 1: Successful Candidates
+        if (successfulCandidates.length > 0) {
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...successColor);
+          doc.text('PART 1: SUCCESSFUL CANDIDATES (' + successfulCandidates.length + ')', margin, yPos);
+          yPos += 8;
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...textColor);
+
+          // Table headers
+          const colX = { name: margin, email: margin + 40, phone: margin + 80, score: margin + 110, reason: margin + 130 };
+          doc.setFont(undefined, 'bold');
+          doc.text('Name', colX.name, yPos);
+          doc.text('Email', colX.email, yPos);
+          doc.text('Phone', colX.phone, yPos);
+          doc.text('Score', colX.score, yPos);
+          doc.text('Reason', colX.reason, yPos);
+          yPos += 5;
+
+          // Add horizontal line
+          doc.setDrawColor(...primaryColor);
+          doc.line(margin, yPos, pageWidth - margin, yPos);
+          yPos += 4;
+
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...textColor);
+
+          // Add each successful candidate
+          successfulCandidates.forEach(function(candidate) {
+            // Check if we need a new page
+            if (yPos > pageHeight - margin - 20) {
+              doc.addPage();
+              yPos = margin;
+            }
+
+            const name = (candidate.name || 'N/A').substring(0, 15);
+            const email = (candidate.email || 'N/A').substring(0, 20);
+            const phone = (candidate.phone || 'N/A').substring(0, 15);
+            const score = (candidate.score || 'N/A').substring(0, 8);
+            const reason = (candidate.reason || 'N/A').substring(0, 35);
+
+            doc.text(name, colX.name, yPos);
+            doc.text(email, colX.email, yPos);
+            doc.text(phone, colX.phone, yPos);
+            doc.text(score, colX.score, yPos);
+            doc.text(reason, colX.reason, yPos);
+            yPos += 5;
+          });
+
+          yPos += 5;
+        }
+
+        // Part 2: Failed Candidates
+        if (failedCandidates.length > 0) {
+          // New page if needed
+          if (yPos > pageHeight - margin - 30) {
+            doc.addPage();
+            yPos = margin;
+          }
+
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...failColor);
+          doc.text('PART 2: FAILED CANDIDATES (' + failedCandidates.length + ')', margin, yPos);
+          yPos += 8;
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...textColor);
+
+          // Table headers
+          const failColX = { name: margin, email: margin + 40, phone: margin + 80, reason: margin + 120 };
+          doc.setFont(undefined, 'bold');
+          doc.text('Name', failColX.name, yPos);
+          doc.text('Email', failColX.email, yPos);
+          doc.text('Phone', failColX.phone, yPos);
+          doc.text('Reason', failColX.reason, yPos);
+          yPos += 5;
+
+          // Add horizontal line
+          doc.setDrawColor(...failColor);
+          doc.line(margin, yPos, pageWidth - margin, yPos);
+          yPos += 4;
+
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(...textColor);
+
+          // Add each failed candidate
+          failedCandidates.forEach(function(candidate) {
+            // Check if we need a new page
+            if (yPos > pageHeight - margin - 20) {
+              doc.addPage();
+              yPos = margin;
+            }
+
+            const name = (candidate.name || 'N/A').substring(0, 15);
+            const email = (candidate.email || 'N/A').substring(0, 20);
+            const phone = (candidate.phone || 'N/A').substring(0, 15);
+            const reason = (candidate.reason || 'N/A').substring(0, 50);
+
+            doc.text(name, failColX.name, yPos);
+            doc.text(email, failColX.email, yPos);
+            doc.text(phone, failColX.phone, yPos);
+            doc.text(reason, failColX.reason, yPos);
+            yPos += 5;
+          });
+
+          yPos += 5;
+        }
+
+        // Add footer with page breaks
+        const totalPages = doc.internal.pages.length - 1;
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setTextColor(...lightColor);
+          const footerY = pageHeight - 10;
+          doc.text('Analysed at Bash Labs Inc - Solving your tomorrow, today ...', pageWidth / 2, footerY, { align: 'center' });
+          doc.setFont(undefined, 'normal');
+          doc.text('Page ' + i + ' of ' + totalPages, pageWidth - margin - 15, footerY);
+        }
+
+        return doc;
+      } catch (err) {
+        console.error('PDF generation error:', err);
+        return null;
+      }
+    }
+
+    async function uploadPDFToSupabase(pdfDoc, batchId, jobCode) {
+      try {
+        if (!pdfDoc) return null;
+
+        // Generate PDF as blob
+        const pdfBlob = pdfDoc.output('blob');
+        const fileName = batchId + '_' + jobCode + '.pdf';
+
+        // Upload to Supabase storage
+        const formData = new FormData();
+        formData.append('file', pdfBlob, fileName);
+
+        const uploadResponse = await fetch(
+          SUPABASE_URL + '/storage/v1/object/batch-reports/' + fileName,
+          {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + SUPABASE_KEY },
+            body: pdfBlob
+          }
+        );
+
+        if (uploadResponse.ok) {
+          const pdfUrl = SUPABASE_URL + '/storage/v1/object/public/batch-reports/' + fileName;
+          return pdfUrl;
+        }
+        return null;
+      } catch (err) {
+        console.error('PDF upload error:', err);
+        return null;
+      }
+    }
+
+    async function saveBatchMetadata(batchId, jobCode, jobId, successCount, failCount, pdfUrl, uploadTime) {
+      try {
+        // Save batch metadata to Supabase batch_uploads table
+        const batchData = {
+          batch_id: batchId,
+          job_code: jobCode,
+          job_id: jobId,
+          upload_date: uploadTime.split(' ')[0],
+          upload_time: uploadTime.split(' ')[1] || '',
+          total_successful: successCount,
+          total_failed: failCount,
+          pdf_report_url: pdfUrl || null,
+          created_at: new Date().toISOString()
+        };
+
+        const response = await fetch(SUPABASE_URL + '/rest/v1/batch_uploads', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          },
+          body: JSON.stringify(batchData)
+        });
+
+        return response.ok;
+      } catch (err) {
+        console.error('Batch metadata save error:', err);
+        return false;
+      }
+    }
+
+    async function handleBulkSubmit(e) {
+      e.preventDefault();
+      const files = document.getElementById('bFiles').files;
+      const msg = document.getElementById('bulkMessage');
+      const btn = document.getElementById('bulkSubmitBtn');
+      const progressSection = document.getElementById('bulkProgress');
+
+      if (files.length === 0) {
+        showMsg(msg, 'Please select files', 'error');
+        return;
+      }
+
+      // Hide old message and show progress
+      msg.style.display = 'none';
+      progressSection.classList.add('show');
+      btn.disabled = true;
+
+      // Initialize tracking
+      processingStartTime = Date.now();
+      failedResumes = [];
+      currentBatchData.successful = [];
+      currentBatchData.failed = [];
+      let successCount = 0, errorCount = 0;
+      const totalFiles = files.length;
+
+      // Generate batch ID
+      const batchId = await generateBatchId(currentJobCode);
+      currentBatchData.jobCode = currentJobCode;
+      currentBatchData.jobId = currentJobId;
+      const uploadTime = new Date().toLocaleString();
+      currentBatchData.uploadTime = uploadTime;
+
+      // Start timer update
+      processingTimerInterval = setInterval(updateProcessingTimer, 1000);
+      updateProcessingTimer();
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const candidate = bulkCandidatesData[i] || {};
+          const name = document.querySelector('.bulk-name-' + i).value.trim();
+          const email = document.querySelector('.bulk-email-' + i).value.trim();
+          const phone = document.querySelector('.bulk-phone-' + i).value || '';
+
+          // Update progress counter
+          const processed = i + 1;
+          document.getElementById('progressCounter').textContent = 'Processing ' + processed + '/' + totalFiles + '...';
+          const progressPercent = (processed / totalFiles) * 100;
+          document.getElementById('progressFill').style.width = progressPercent + '%';
+
+          if (!name || !email) {
+            failedResumes.push({ filename: candidate.filename, reason: 'Name & Email required' });
+            currentBatchData.failed.push({ name: name || 'N/A', email: email || 'N/A', phone: phone || '', reason: 'Name & Email required' });
+            errorCount++;
+            continue;
+          }
+
+          try {
+            const check = await fetch(SUPABASE_URL + '/rest/v1/candidates?email=eq.' + encodeURIComponent(email) + '&job_id=eq.' + currentJobId + '&select=id', {
+              headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+            });
+            const existing = await check.json();
+            if (existing.length > 0) {
+              failedResumes.push({ filename: candidate.filename, reason: 'Email already applied for this job' });
+              currentBatchData.failed.push({ name: name, email: email, phone: phone || '', reason: 'Email already applied for this job' });
+              errorCount++;
+              continue;
+            }
+
+            const score = await fetch(SCORER_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+              body: JSON.stringify({
+                resumeText: candidate.resumeText,
+                email: email,
+                name: name,
+                phone: phone,
+                jobId: currentJobId
+              })
+            });
+
+            if (!score.ok) {
+              failedResumes.push({ filename: candidate.filename, reason: 'Scoring failed - API error' });
+              currentBatchData.failed.push({ name: name, email: email, phone: phone || '', reason: 'Scoring failed - API error' });
+              errorCount++;
+              continue;
+            }
+
+            const scoreData = await score.json();
+            successCount++;
+            currentBatchData.successful.push({
+              name: name,
+              email: email,
+              phone: phone || '',
+              score: (scoreData.score || 'N/A').toString(),
+              reason: scoreData.scoring_reason || 'No reason provided'
+            });
+          } catch (err) {
+            failedResumes.push({ filename: candidate.filename, reason: err.message });
+            currentBatchData.failed.push({ name: name, email: email, phone: phone || '', reason: err.message });
+            errorCount++;
+          }
+        }
+
+        // Stop timer
+        clearInterval(processingTimerInterval);
+
+        // Show summary modal
+        showSummaryModal(successCount, errorCount, totalFiles);
+
+        // Generate and upload PDF in background (don't block user)
+        setTimeout(async function() {
+          const pdfDoc = await generatePDFReport(batchId, currentJobCode, currentBatchData.successful, currentBatchData.failed, uploadTime);
+          if (pdfDoc) {
+            const pdfUrl = await uploadPDFToSupabase(pdfDoc, batchId, currentJobCode);
+            await saveBatchMetadata(batchId, currentJobCode, currentJobId, successCount, errorCount, pdfUrl, uploadTime);
+            console.log('Batch report generated:', batchId);
+          }
+        }, 500);
+
+      } catch (err) {
+        clearInterval(processingTimerInterval);
+        progressSection.classList.remove('show');
+        msg.style.display = 'block';
+        showMsg(msg, 'Error: ' + err.message, 'error');
+      }
+
+      btn.disabled = false;
+    }
+
+    function updateProcessingTimer() {
+      if (!processingStartTime) return;
+      const elapsed = Math.floor((Date.now() - processingStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timeStr = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+      document.getElementById('progressTimer').textContent = timeStr + ' elapsed';
+    }
+
+    function showSummaryModal(successCount, errorCount, totalFiles) {
+      document.getElementById('statSuccess').textContent = successCount;
+      document.getElementById('statFailed').textContent = errorCount;
+      document.getElementById('statTotal').textContent = totalFiles;
+
+      // Show processing time
+      clearInterval(processingTimerInterval);
+      const elapsed = Math.floor((Date.now() - processingStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timeStr = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+      document.getElementById('summaryTime').textContent = timeStr;
+
+      // Show failed resumes if any
+      const failedSection = document.getElementById('failedResumes');
+      if (failedResumes.length > 0) {
+        let failedHtml = '<div class="failed-section"><h3>❌ ' + failedResumes.length + ' Failed Resumes:</h3>';
+        failedResumes.forEach(function(item) {
+          failedHtml += '<div class="failed-item"><strong>' + escapeHtml(item.filename) + '</strong><br><small>Reason: ' + escapeHtml(item.reason) + '</small></div>';
+        });
+        failedHtml += '</div>';
+        failedSection.innerHTML = failedHtml;
+
+        // Save failed resumes to localStorage for later review
+        const allFailed = JSON.parse(localStorage.getItem('rejectedResumes') || '[]');
+        const timestamp = new Date().toLocaleString();
+        const batch = {
+          timestamp: timestamp,
+          jobId: currentJobId,
+          failed: failedResumes
+        };
+        allFailed.push(batch);
+        localStorage.setItem('rejectedResumes', JSON.stringify(allFailed));
+      } else {
+        failedSection.innerHTML = '';
+      }
+
+      document.getElementById('summaryModal').classList.add('active');
+      document.getElementById('bulkProgress').classList.remove('show');
+    }
+
+    function closeSummaryModal() {
+      document.getElementById('summaryModal').classList.remove('active');
+    }
+
+    function closeSummaryAndReload() {
+      closeSummaryModal();
+      closeModal();
+      loadJobs();
+    }
+
+    function showMsg(el, txt, type) {
+      el.className = 'message show ' + type;
+      el.textContent = txt;
+    }
+
+    function toBase64(file) {
+      return new Promise(function(res, rej) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          const b64 = reader.result.split(',')[1] || reader.result;
+          res(b64);
+        };
+        reader.onerror = function() { rej(new Error('Failed to read file')); };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function escapeHtml(txt) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(txt).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    function goToLogin() { window.location.href = 'login.html'; }
+    function goToDashboard() { window.location.href = 'hr-dashboard.html'; }
+    function logout() { localStorage.removeItem('hrUser'); updateUI(); loadJobs(); }
+
+    function openResumeModal(candidateIndex) {
+      const candidate = bulkCandidatesData[candidateIndex];
+      if (!candidate) return;
+
+      currentResumeModalCandidateIndex = candidateIndex;
+      document.getElementById('resumeTextPreview').textContent = candidate.resumeText || '(No resume text extracted)';
+      document.getElementById('resumeName').value = candidate.name || '';
+      document.getElementById('resumeEmail').value = candidate.email || '';
+      document.getElementById('resumePhone').value = candidate.phone || '';
+      document.getElementById('resumeModal').classList.add('active');
+    }
+
+    function closeResumeModal() {
+      document.getElementById('resumeModal').classList.remove('active');
+      currentResumeModalCandidateIndex = null;
+    }
+
+    function saveResumeData() {
+      if (currentResumeModalCandidateIndex === null) return;
+
+      const name = document.getElementById('resumeName').value.trim();
+      const email = document.getElementById('resumeEmail').value.trim();
+      const phone = document.getElementById('resumePhone').value.trim();
+
+      if (!name || !email) {
+        alert('Name and Email are required');
+        return;
+      }
+
+      bulkCandidatesData[currentResumeModalCandidateIndex].name = name;
+      bulkCandidatesData[currentResumeModalCandidateIndex].email = email;
+      bulkCandidatesData[currentResumeModalCandidateIndex].phone = phone;
+
+      // Update the UI
+      document.querySelector('.bulk-name-' + currentResumeModalCandidateIndex).value = name;
+      document.querySelector('.bulk-email-' + currentResumeModalCandidateIndex).value = email;
+      document.querySelector('.bulk-phone-' + currentResumeModalCandidateIndex).value = phone;
+
+      renderBulkCandidates();
+      closeResumeModal();
+    }
+
+    function viewRejectedResumes() {
+      const allFailed = JSON.parse(localStorage.getItem('rejectedResumes') || '[]');
+      const jobFailed = allFailed.filter(function(batch) { return batch.jobId === currentJobId; });
+
+      if (jobFailed.length === 0) {
+        alert('No rejected resumes for this job');
+        return;
+      }
+
+      let html = '📋 REJECTED RESUMES FOR THIS JOB\n\n';
+      jobFailed.forEach(function(batch, idx) {
+        html += '--- Batch ' + (idx + 1) + ' (' + batch.timestamp + ') ---\n';
+        batch.failed.forEach(function(item) {
+          html += '❌ ' + item.filename + '\n   Reason: ' + item.reason + '\n';
+        });
+        html += '\n';
+      });
+
+      alert(html);
+    }
+  </script>
+</body>
+</html>
