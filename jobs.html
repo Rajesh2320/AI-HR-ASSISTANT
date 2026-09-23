@@ -850,6 +850,7 @@
       </div>
       <div class="header-actions">
         <button id="loginBtn" onclick="goToLogin()">Login as HR</button>
+        <button id="jobModBtn" class="btn-dashboard" onclick="goToAdminJobs()" style="display: none;">Job Modification</button>
         <button id="dashboardBtn" class="btn-dashboard" onclick="goToDashboard()" style="display: none;">View Dashboard</button>
         <button id="logoutBtn" class="btn-logout" onclick="logout()" style="display: none;">Logout</button>
       </div>
@@ -1146,10 +1147,12 @@
       const hrUser = localStorage.getItem('hrUser');
       if (hrUser) {
         document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('jobModBtn').style.display = 'block';
         document.getElementById('dashboardBtn').style.display = 'block';
         document.getElementById('logoutBtn').style.display = 'block';
       } else {
         document.getElementById('loginBtn').style.display = 'block';
+        document.getElementById('jobModBtn').style.display = 'none';
         document.getElementById('dashboardBtn').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
       }
@@ -2296,6 +2299,7 @@
     }
 
     function goToLogin() { window.location.href = 'login.html'; }
+    function goToAdminJobs() { window.location.href = 'admin-jobs.html'; }
     function goToDashboard() { window.location.href = 'hr-dashboard.html'; }
     function logout() { localStorage.removeItem('hrUser'); updateUI(); loadJobs(); }
 
