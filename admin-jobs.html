@@ -474,10 +474,26 @@
             <p><strong>Description:</strong> ${escapeHtml(job.description)}</p>
             <p><strong>Requirements:</strong> ${escapeHtml(job.requirements)}</p>
             <div class="job-actions">
-              <button class="btn-secondary" onclick="openEditModal('${job.id}', '${escapeHtml(job.title)}', '${escapeHtml(job.description)}', '${escapeHtml(job.requirements)}', '${job.status}')">Edit</button>
-              <button class="btn-danger" onclick="deleteJob('${job.id}')">Delete</button>
+              <button class="btn-secondary" data-job-id="${job.id}" data-job-title="${escapeHtml(job.title)}" data-job-desc="${escapeHtml(job.description)}" data-job-reqs="${escapeHtml(job.requirements)}" data-job-status="${job.status}">Edit</button>
+              <button class="btn-danger" data-delete-id="${job.id}">Delete</button>
             </div>
           `;
+
+          // Add event listeners
+          card.querySelector('.btn-secondary').addEventListener('click', function() {
+            openEditModal(
+              this.dataset.jobId,
+              this.dataset.jobTitle,
+              this.dataset.jobDesc,
+              this.dataset.jobReqs,
+              this.dataset.jobStatus
+            );
+          });
+
+          card.querySelector('.btn-danger').addEventListener('click', function() {
+            deleteJob(this.dataset.deleteId);
+          });
+
           grid.appendChild(card);
         });
 
