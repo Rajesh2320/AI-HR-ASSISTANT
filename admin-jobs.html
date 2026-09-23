@@ -271,6 +271,31 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* Modal styling */
+    #editModal {
+      display: none !important;
+    }
+
+    #editModal[style*="display: flex"] {
+      display: flex !important;
+    }
+
+    #editModal > div {
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 20px;
@@ -315,6 +340,45 @@
 
     <div id="successMessage" class="message success"></div>
     <div id="errorMessage" class="message error"></div>
+
+    <!-- Edit Job Modal -->
+    <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 32px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+        <h2 style="margin-bottom: 20px;">Edit Job Position</h2>
+        <form id="editJobForm">
+          <input type="hidden" id="editJobId">
+
+          <div class="form-group">
+            <label for="editJobTitle">Job Title *</label>
+            <input type="text" id="editJobTitle" placeholder="e.g., Senior Software Engineer" required>
+          </div>
+
+          <div class="form-group">
+            <label for="editJobDescription">Description *</label>
+            <textarea id="editJobDescription" placeholder="Describe the role, responsibilities, and what you're looking for..." required style="min-height: 100px;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="editJobRequirements">Requirements *</label>
+            <textarea id="editJobRequirements" placeholder="List key requirements, skills, and qualifications..." required style="min-height: 100px;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="editJobStatus">Status *</label>
+            <select id="editJobStatus" required>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="paused">Paused</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" style="flex: 1;">Save Changes</button>
+            <button type="button" onclick="closeEditModal()" class="btn-secondary" style="flex: 1; margin-left: 0;">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <div class="form-section">
       <h2>Create New Job Position</h2>
@@ -410,7 +474,7 @@
             <p><strong>Description:</strong> ${escapeHtml(job.description)}</p>
             <p><strong>Requirements:</strong> ${escapeHtml(job.requirements)}</p>
             <div class="job-actions">
-              <button class="btn-secondary" onclick="editJob('${job.id}')">Edit</button>
+              <button class="btn-secondary" onclick="openEditModal('${job.id}', '${escapeHtml(job.title)}', '${escapeHtml(job.description)}', '${escapeHtml(job.requirements)}', '${job.status}')">Edit</button>
               <button class="btn-danger" onclick="deleteJob('${job.id}')">Delete</button>
             </div>
           `;
@@ -476,10 +540,48 @@
       }
     });
 
-    // Edit job (placeholder)
-    window.editJob = function(jobId) {
-      alert('Edit functionality coming soon. Job ID: ' + jobId);
+    // Open edit modal
+    window.openEditModal = function(jobId, title, description, requirements, status) {
+      document.getElementById('editJobId').value = jobId;
+      document.getElementById('editJobTitle').value = title;
+      document.getElementById('editJobDescription').value = description;
+      document.getElementById('editJobRequirements').value = requirements;
+      document.getElementById('editJobStatus').value = status;
+      document.getElementById('editModal').style.display = 'flex';
     };
+
+    // Close edit modal
+    window.closeEditModal = function() {
+      document.getElementById('editModal').style.display = 'none';
+    };
+
+    // Handle edit form submission
+    document.getElementById('editJobForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const jobId = document.getElementById('editJobId').value;
+      const title = document.getElementById('editJobTitle').value;
+      const description = document.getElementById('editJobDescription').value;
+      const requirements = document.getElementById('editJobRequirements').value;
+      const status = document.getElementById('editJobStatus').value;
+
+      try {
+        const { data, error } = await supabase
+          .from('jobs')
+          .update({ title, description, requirements, status })
+          .eq('id', jobId)
+          .select();
+
+        if (error) throw error;
+
+        showMessage('success', 'Job position updated successfully!');
+        closeEditModal();
+        loadJobs();
+      } catch (error) {
+        console.error('Error updating job:', error);
+        showMessage('error', `Error: ${error.message}`);
+      }
+    });
 
     // Delete job
     window.deleteJob = async function(jobId) {
