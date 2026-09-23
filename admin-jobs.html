@@ -406,6 +406,7 @@
           card.innerHTML = `
             <span class="status-badge ${statusClass}">${job.status}</span>
             <h3>${escapeHtml(job.title)}</h3>
+            <p><strong>Job Code:</strong> <code style="background-color: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${escapeHtml(job.job_code || 'N/A')}</code></p>
             <p><strong>Description:</strong> ${escapeHtml(job.description)}</p>
             <p><strong>Requirements:</strong> ${escapeHtml(job.requirements)}</p>
             <div class="job-actions">
@@ -423,6 +424,31 @@
       }
     }
 
+    // Generate job code
+    function generateJobCode(jobTitle) {
+      // Get first letters of job title
+      const firstLetters = jobTitle
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase();
+
+      // Get current date and time
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const dateStr = `${year}${month}${day}`;
+      const timeStr = `${hours}${minutes}${seconds}`;
+
+      // Combine into job code
+      return `${firstLetters}-${dateStr}-${timeStr}`;
+    }
+
     // Create job
     document.getElementById('jobForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -431,16 +457,17 @@
       const description = document.getElementById('jobDescription').value;
       const requirements = document.getElementById('jobRequirements').value;
       const status = document.getElementById('jobStatus').value;
+      const jobCode = generateJobCode(title);
 
       try {
         const { data, error } = await supabase
           .from('jobs')
-          .insert([{ title, description, requirements, status }])
+          .insert([{ title, description, requirements, status, job_code: jobCode }])
           .select();
 
         if (error) throw error;
 
-        showMessage('success', 'Job position created successfully!');
+        showMessage('success', `Job position created successfully! Code: ${jobCode}`);
         document.getElementById('jobForm').reset();
         loadJobs();
       } catch (error) {
