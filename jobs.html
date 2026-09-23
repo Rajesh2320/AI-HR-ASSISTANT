@@ -72,6 +72,14 @@
       align-items: flex-start;
       gap: 12px;
     }
+    .job-card-metadata {
+      font-size: 0.85rem;
+      color: #666;
+      margin: 8px 0;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
     .job-code-col {
       font-family: 'Courier New', monospace;
       font-weight: 700;
@@ -1173,6 +1181,10 @@
 
       jobs.forEach(function(job, index) {
         const summary = job.description.substring(0, 120) + (job.description.length > 120 ? '...' : '');
+        const location = job.location || 'Location TBA';
+        const empType = job.employment_type || 'Not specified';
+        const metadata = `📍 ${escapeHtml(location)} • 💼 ${escapeHtml(empType)}`;
+        
         gridHtml += `
           <div class="job-card">
             <div class="job-card-header">
@@ -1182,6 +1194,7 @@
               <span class="status-badge">Open</span>
             </div>
             <h2>${escapeHtml(job.title)}</h2>
+            <div class="job-card-metadata">${metadata}</div>
             <div class="job-card-summary">${escapeHtml(summary)}</div>
             <div class="job-card-actions">
               <button onclick="openJobDetails(${index})">View Details</button>
