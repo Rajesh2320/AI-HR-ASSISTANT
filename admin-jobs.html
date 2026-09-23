@@ -38,6 +38,27 @@
     header {
       text-align: center;
       margin-bottom: 40px;
+      position: relative;
+    }
+
+    .back-button {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #6b7280;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #4b5563;
+      transform: translateY(-2px);
     }
 
     header h1 {
@@ -275,12 +296,19 @@
         margin-left: 0;
         margin-top: 8px;
       }
+
+      .back-button {
+        position: static;
+        margin-bottom: 20px;
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
+      <button class="back-button" onclick="goBackToJobs()">← Back to Jobs</button>
       <h1>Job Management</h1>
       <p class="subtitle">Create and manage job positions</p>
     </header>
@@ -336,6 +364,11 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3dGtoc3BoYXlrZWJucXFxd2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NzM4MzgsImV4cCI6MjEwNTU0OTgzOH0.Kia5M7o9BqmO5OgzxXBxeE2--2p4nI_BflXnEORJpgY';
 
     let supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Go back to jobs.html
+    window.goBackToJobs = function() {
+      window.location.href = 'jobs.html';
+    };
 
     // Show message
     function showMessage(type, message) {
