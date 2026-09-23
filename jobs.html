@@ -1102,11 +1102,11 @@
     // ========================================================================
     const EXTRACTOR_URL = USE_OPTIMIZED_FUNCTIONS
       ? SUPABASE_URL + '/functions/v1/extract-candidate-info-v2'
-      : SUPABASE_URL + '/functions/v1/extract-candidate-info';
+      : SUPABASE_URL + '/functions/v1/extract-candidate-info-v1';
 
     const SCORER_URL = USE_OPTIMIZED_FUNCTIONS
       ? SUPABASE_URL + '/functions/v1/score-resume-v2'
-      : SUPABASE_URL + '/functions/v1/score-resume';
+      : SUPABASE_URL + '/functions/v1/score-resume-v1';
 
     // Batch tracking variables
     let batchCounter = {};
