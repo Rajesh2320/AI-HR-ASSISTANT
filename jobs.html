@@ -856,63 +856,63 @@
 
     <!-- A/B Testing Token Dashboard (Standalone) -->
     <div id="tokenComparisonDashboard">
-      <h3>📊 Token Usage & Billing Dashboard</h3>
+      <h3>💳 Billing Dashboard (V3 - SERVICE_ROLE_KEY)</h3>
 
-      <!-- Billing Summary Section -->
-      <div style="background: white; padding: 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 12px;">
-          <div>
-            <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Resumes Processed</div>
-            <div id="total-resumes" style="font-size: 28px; font-weight: 700; color: #3b82f6; margin-top: 4px;">-</div>
+      <!-- Currency & Exchange Rate Section -->
+      <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #e5e7eb;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: #6b7280; font-weight: 600;">USD to INR Rate</label>
+            <input type="number" id="exchangeRate" step="0.01" value="83.50" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; margin-top: 4px;" onchange="updateExchangeRate()">
           </div>
-          <div>
-            <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Cost (All Versions)</div>
-            <div id="total-cost-all" style="font-size: 28px; font-weight: 700; color: #dc2626; margin-top: 4px;">-</div>
-          </div>
-          <div>
-            <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Cost Savings</div>
-            <div id="total-savings-cost" style="font-size: 28px; font-weight: 700; color: #16a34a; margin-top: 4px;">-</div>
+          <div style="flex: 2;">
+            <button onclick="downloadBillingCSV()" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">📥 Download Billing (CSV)</button>
           </div>
         </div>
       </div>
 
-      <!-- Comparison Table -->
-      <table>
+      <!-- Summary Cards -->
+      <div style="background: white; padding: 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px;">
+          <div>
+            <div style="font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Resumes</div>
+            <div id="total-resumes" style="font-size: 24px; font-weight: 700; color: #3b82f6; margin-top: 4px;">-</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Cost (USD)</div>
+            <div id="total-cost-usd" style="font-size: 24px; font-weight: 700; color: #dc2626; margin-top: 4px;">-</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Cost (INR)</div>
+            <div id="total-cost-inr" style="font-size: 24px; font-weight: 700; color: #10b981; margin-top: 4px;">-</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Avg Cost/Resume</div>
+            <div id="avg-cost-resume" style="font-size: 24px; font-weight: 700; color: #f59e0b; margin-top: 4px;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing Table by Date -->
+      <table style="width: 100%; border-collapse: collapse;">
         <thead>
-          <tr>
-            <th style="padding: 10px; text-align: left; font-weight: 600;">Version</th>
-            <th style="padding: 10px; text-align: center;">Resumes</th>
-            <th style="padding: 10px; text-align: right;">Total Tokens</th>
-            <th style="padding: 10px; text-align: right;">Avg Tokens/Resume</th>
-            <th style="padding: 10px; text-align: right;">Total Cost</th>
+          <tr style="background: #e0e7ff; border-bottom: 2px solid #3b82f6;">
+            <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 13px;">Date</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 13px;">Resumes</th>
+            <th style="padding: 12px; text-align: right; font-weight: 600; font-size: 13px;">Tokens</th>
+            <th style="padding: 12px; text-align: right; font-weight: 600; font-size: 13px;">Cost (USD)</th>
+            <th style="padding: 12px; text-align: right; font-weight: 600; font-size: 13px;">Cost (INR)</th>
           </tr>
         </thead>
-        <tbody>
-          <tr style="border-bottom: 1px solid #ddd;">
-            <td style="padding: 10px; font-weight: 600; color: #374151;">V2 (Baseline)</td>
-            <td id="v2-calls" style="padding: 10px; text-align: center;">-</td>
-            <td id="v2-tokens" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-            <td id="v2-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-            <td id="v2-cost" style="padding: 10px; text-align: right; color: #dc2626; font-weight: 600;">-</td>
-          </tr>
+        <tbody id="billingTableBody">
           <tr>
-            <td style="padding: 10px; font-weight: 600; color: #374151;">V3 (Optimized)</td>
-            <td id="v3-calls" style="padding: 10px; text-align: center;">-</td>
-            <td id="v3-tokens" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-            <td id="v3-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-            <td id="v3-cost" style="padding: 10px; text-align: right; color: #16a34a; font-weight: 600;">-</td>
-          </tr>
-          <tr style="background: #f9fafb;">
-            <td style="padding: 10px; font-weight: 600; color: #374151;">💰 Cost Difference</td>
-            <td style="padding: 10px; text-align: center;">-</td>
-            <td id="savings-tokens" style="padding: 10px; text-align: right; color: #b91c1c; font-family: monospace;">-</td>
-            <td id="savings-percent" style="padding: 10px; text-align: right; color: #b91c1c; font-weight: 600;">-</td>
-            <td id="savings-cost" style="padding: 10px; text-align: right; color: #16a34a; font-weight: 600;">-</td>
+            <td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af; font-size: 13px;">No data yet. Upload resumes to generate billing data.</td>
           </tr>
         </tbody>
       </table>
-      <p style="margin-top: 16px; font-size: 13px; color: #666; background: #fef9e7; padding: 12px; border-radius: 4px; border-left: 3px solid #f59e0b;">
-        📋 <strong>Billing Summary:</strong> This dashboard tracks API usage and costs for V2 (baseline) vs V3 (optimized with SERVICE_ROLE_KEY). Use the "Total Cost" column for billing. Cost savings show how much V3 reduces expenses compared to V2.
+
+      <p style="margin-top: 16px; font-size: 12px; color: #666; background: #f0fdf4; padding: 12px; border-radius: 4px; border-left: 3px solid #10b981;">
+        ✅ <strong>For Billing:</strong> Use the USD cost for actual billing. INR conversion is for reference. Click "Download Billing" to export data as CSV.
       </p>
     </div>
 
@@ -1103,11 +1103,16 @@
     // ========================================================================
     const USE_OPTIMIZED_FUNCTIONS = true; // CHANGE TO false TO TEST V2 BASELINE
 
-    // Token tracking for comparison
+    // Token tracking - V3 only with date tracking
     let tokenMetrics = {
-      v2: { total_calls: 0, total_tokens: 0, total_cost: 0 },
-      v3: { total_calls: 0, total_tokens: 0, total_cost: 0 },
+      v3: { total_calls: 0, total_tokens: 0, total_cost: 0, total_resumes: 0 },
     };
+
+    // Billing data by date for export
+    let billingByDate = {}; // Format: { 'YYYY-MM-DD': { resumes, tokens, cost, timestamp } }
+
+    // Exchange rate USD to INR
+    let usdToInrRate = 83.50; // Default rate - will update with current rate
 
     // Display A/B testing status in console
     console.log(`[A/B Testing] Using: ${USE_OPTIMIZED_FUNCTIONS ? 'V3 (SERVICE_ROLE_KEY + Haiku)' : 'V2 (BASELINE)'}`);
@@ -1345,6 +1350,16 @@
           tokenMetrics[version].total_calls += 1;
           tokenMetrics[version].total_tokens += scoreData._tokens.total;
           tokenMetrics[version].total_cost += scoreData._tokens.cost;
+          tokenMetrics[version].total_resumes += 1; // Count actual resume processed
+
+          // Track billing by date
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+          if (!billingByDate[today]) {
+            billingByDate[today] = { resumes: 0, tokens: 0, cost: 0, timestamp: new Date() };
+          }
+          billingByDate[today].resumes += 1;
+          billingByDate[today].tokens += scoreData._tokens.total;
+          billingByDate[today].cost += scoreData._tokens.cost;
 
           console.log(
             `[Token Tracking] ${version.toUpperCase()} Score - Input: ${scoreData._tokens.input}, Output: ${scoreData._tokens.output}, Total: ${scoreData._tokens.total}, Cost: $${scoreData._tokens.cost}`
@@ -1584,54 +1599,104 @@
     }
 
     // ========================================================================
-    // A/B TESTING - Update token dashboard
+    // BILLING DASHBOARD - Update token dashboard with date-wise breakdown
     // ========================================================================
     function updateTokenDashboard() {
-      const dashboard = document.getElementById('tokenComparisonDashboard');
-      const v2 = tokenMetrics.v2;
       const v3 = tokenMetrics.v3;
 
-      // Calculate totals for billing
-      const totalResumes = v2.total_calls + v3.total_calls;
-      const totalCostAll = v2.total_cost + v3.total_cost;
-      const costSavings = v2.total_cost - v3.total_cost;
+      // Calculate totals
+      const totalResumes = v3.total_resumes;
+      const totalCostUSD = v3.total_cost;
+      const totalCostINR = totalCostUSD * usdToInrRate;
+      const avgCostPerResume = totalResumes > 0 ? totalCostUSD / totalResumes : 0;
 
-      // Update Billing Summary
+      // Update Summary Cards
       document.getElementById('total-resumes').textContent = totalResumes > 0 ? totalResumes : '-';
-      document.getElementById('total-cost-all').textContent = totalResumes > 0 ? `$${totalCostAll.toFixed(4)}` : '-';
-      document.getElementById('total-savings-cost').textContent = totalResumes > 0
-        ? (costSavings > 0 ? `-$${costSavings.toFixed(4)}` : (costSavings < 0 ? `+$${Math.abs(costSavings).toFixed(4)}` : '$0.0000'))
-        : '-';
+      document.getElementById('total-cost-usd').textContent = totalResumes > 0 ? `$${totalCostUSD.toFixed(4)}` : '-';
+      document.getElementById('total-cost-inr').textContent = totalResumes > 0 ? `₹${totalCostINR.toFixed(2)}` : '-';
+      document.getElementById('avg-cost-resume').textContent = totalResumes > 0 ? `$${avgCostPerResume.toFixed(4)}` : '-';
 
-      // Calculate averages
-      const v2Avg = v2.total_calls > 0 ? Math.round(v2.total_tokens / v2.total_calls) : 0;
-      const v3Avg = v3.total_calls > 0 ? Math.round(v3.total_tokens / v3.total_calls) : 0;
+      // Populate billing table by date
+      const billingTableBody = document.getElementById('billingTableBody');
+      const sortedDates = Object.keys(billingByDate).sort().reverse(); // Most recent first
 
-      // Calculate savings (V3 compared to V2)
-      const tokenSavings = v2.total_tokens - v3.total_tokens;
-      const savingsPercent = v2.total_tokens > 0
-        ? Math.round((tokenSavings / v2.total_tokens) * 100)
-        : 0;
+      if (sortedDates.length === 0) {
+        billingTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af; font-size: 13px;">No data yet. Upload resumes to generate billing data.</td></tr>';
+      } else {
+        billingTableBody.innerHTML = sortedDates.map(date => {
+          const data = billingByDate[date];
+          const costINR = data.cost * usdToInrRate;
+          return `
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+              <td style="padding: 12px; text-align: left; font-family: inherit;">${date}</td>
+              <td style="padding: 12px; text-align: center; font-family: monospace;">${data.resumes}</td>
+              <td style="padding: 12px; text-align: right; font-family: monospace;">${data.tokens.toLocaleString()}</td>
+              <td style="padding: 12px; text-align: right; font-family: monospace;">$${data.cost.toFixed(4)}</td>
+              <td style="padding: 12px; text-align: right; font-family: monospace;">₹${costINR.toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
 
-      // Update V2
-      document.getElementById('v2-calls').textContent = v2.total_calls;
-      document.getElementById('v2-tokens').textContent = v2.total_tokens.toLocaleString();
-      document.getElementById('v2-avg').textContent = v2Avg.toLocaleString();
-      document.getElementById('v2-cost').textContent = `$${v2.total_cost.toFixed(4)}`;
+    // ========================================================================
+    // Update exchange rate and refresh dashboard
+    // ========================================================================
+    function updateExchangeRate() {
+      const rateInput = document.getElementById('exchangeRate');
+      const newRate = parseFloat(rateInput.value);
 
-      // Update V3
-      document.getElementById('v3-calls').textContent = v3.total_calls;
-      document.getElementById('v3-tokens').textContent = v3.total_tokens.toLocaleString();
-      document.getElementById('v3-avg').textContent = v3Avg.toLocaleString();
-      document.getElementById('v3-cost').textContent = `$${v3.total_cost.toFixed(4)}`;
+      if (!isNaN(newRate) && newRate > 0) {
+        usdToInrRate = newRate;
+        updateTokenDashboard();
+        console.log(`[Billing] Exchange rate updated to: ₹${usdToInrRate} per USD`);
+      } else {
+        alert('Please enter a valid exchange rate');
+        rateInput.value = usdToInrRate;
+      }
+    }
 
-      // Update Savings
-      document.getElementById('savings-tokens').textContent =
-        tokenSavings > 0 ? `-${tokenSavings.toLocaleString()}` : (tokenSavings < 0 ? `+${Math.abs(tokenSavings).toLocaleString()}` : '—');
-      document.getElementById('savings-percent').textContent =
-        tokenSavings > 0 ? `-${savingsPercent}%` : (tokenSavings < 0 ? `+${Math.abs(savingsPercent)}%` : '—');
-      document.getElementById('savings-cost').textContent =
-        costSavings > 0 ? `-$${costSavings.toFixed(4)}` : (costSavings < 0 ? `+$${Math.abs(costSavings).toFixed(4)}` : '—');
+    // ========================================================================
+    // Download billing data as CSV
+    // ========================================================================
+    function downloadBillingCSV() {
+      const v3 = tokenMetrics.v3;
+
+      if (v3.total_resumes === 0) {
+        alert('No billing data to download. Please upload and process resumes first.');
+        return;
+      }
+
+      // Create CSV content
+      let csvContent = 'Date,Resumes,Tokens,Cost (USD),Cost (INR)\n';
+
+      const sortedDates = Object.keys(billingByDate).sort();
+      sortedDates.forEach(date => {
+        const data = billingByDate[date];
+        const costINR = data.cost * usdToInrRate;
+        csvContent += `${date},${data.resumes},${data.tokens},${data.cost.toFixed(4)},${costINR.toFixed(2)}\n`;
+      });
+
+      // Add summary row
+      const totalCostINR = v3.total_cost * usdToInrRate;
+      csvContent += `\nTotal,${v3.total_resumes},${v3.total_tokens},${v3.total_cost.toFixed(4)},${totalCostINR.toFixed(2)}\n`;
+      csvContent += `\nExchange Rate (USD to INR),${usdToInrRate}\n`;
+      csvContent += `Generated,${new Date().toLocaleString()}\n`;
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', `billing-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      console.log('[Billing] CSV exported successfully');
     }
 
     async function generateBatchId(jobCode) {
@@ -2043,6 +2108,16 @@
               tokenMetrics[version].total_calls += 1;
               tokenMetrics[version].total_tokens += scoreData._tokens.total;
               tokenMetrics[version].total_cost += scoreData._tokens.cost;
+              tokenMetrics[version].total_resumes += 1; // Count actual resume processed
+
+              // Track billing by date
+              const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+              if (!billingByDate[today]) {
+                billingByDate[today] = { resumes: 0, tokens: 0, cost: 0, timestamp: new Date() };
+              }
+              billingByDate[today].resumes += 1;
+              billingByDate[today].tokens += scoreData._tokens.total;
+              billingByDate[today].cost += scoreData._tokens.cost;
 
               console.log(
                 `[Token Tracking] ${version.toUpperCase()} Score - Input: ${scoreData._tokens.input}, Output: ${scoreData._tokens.output}, Total: ${scoreData._tokens.total}, Cost: $${scoreData._tokens.cost}`
