@@ -760,7 +760,7 @@
       border-radius: 8px;
       padding: 20px;
       margin: 20px 0;
-      display: block;
+      display: none;
     }
     #tokenComparisonDashboard h3 {
       margin-top: 0;
@@ -1162,10 +1162,14 @@
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('dashboardBtn').style.display = 'block';
         document.getElementById('logoutBtn').style.display = 'block';
+        // Show billing dashboard only for logged-in HR users
+        document.getElementById('tokenComparisonDashboard').style.display = 'block';
       } else {
         document.getElementById('loginBtn').style.display = 'block';
         document.getElementById('dashboardBtn').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
+        // Hide billing dashboard for non-logged-in users
+        document.getElementById('tokenComparisonDashboard').style.display = 'none';
       }
     }
 
@@ -2202,7 +2206,13 @@
 
     function goToLogin() { window.location.href = 'login.html'; }
     function goToDashboard() { window.location.href = 'hr-dashboard.html'; }
-    function logout() { localStorage.removeItem('hrUser'); updateUI(); loadJobs(); }
+    function logout() {
+      localStorage.removeItem('hrUser');
+      updateUI();
+      loadJobs();
+      // Hide billing dashboard on logout
+      document.getElementById('tokenComparisonDashboard').style.display = 'none';
+    }
 
     function openResumeModal(candidateIndex) {
       const candidate = bulkCandidatesData[candidateIndex];
