@@ -1113,7 +1113,7 @@
     let billingByDate = {}; // Format: { 'YYYY-MM-DD': { resumes, tokens, cost, timestamp } }
 
     // Exchange rate USD to INR
-    let usdToInrRate = 83.50; // Default rate - will update with current rate
+    let usdToInrRate = 96; // Hardcoded rate as of 2026-09-23 (fallback if APIs fail)
 
     // Display A/B testing status in console
     console.log(`[A/B Testing] Using: ${USE_OPTIMIZED_FUNCTIONS ? 'V3 (SERVICE_ROLE_KEY + Haiku)' : 'V2 (BASELINE)'}`);
@@ -1161,6 +1161,7 @@
       loadJobs();
       setupBulkFileListener();
       loadBillingDataFromDB(); // Load billing data from database
+      fetchLiveExchangeRate(); // Fetch current USD to INR rate
     });
 
     function updateUI() {
@@ -1705,6 +1706,66 @@
     }
 
     // ========================================================================
+    // EXCHANGE RATE - Fetch live USD to INR conversion rate with fallback
+    // ========================================================================
+    async function fetchLiveExchangeRate() {
+      try {
+        // Primary API: exchangerate-api.com
+        console.log('[Exchange Rate] Attempting to fetch from exchangerate-api.com...');
+        const response1 = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          timeout: 5000
+        });
+
+        if (response1.ok) {
+          const data = await response1.json();
+          const inrRate = data.rates.INR;
+
+          if (inrRate && inrRate > 0) {
+            usdToInrRate = parseFloat(inrRate.toFixed(2));
+            document.getElementById('exchangeRate').value = usdToInrRate;
+            console.log(`[Exchange Rate] ✅ Updated to ₹${usdToInrRate} per USD (from exchangerate-api.com, as of ${data.date})`);
+            updateTokenDashboard();
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('[Exchange Rate] Primary API failed:', error.message);
+      }
+
+      // Fallback API: exchangerates.io
+      try {
+        console.log('[Exchange Rate] Attempting fallback API (exchangerates.io)...');
+        const response2 = await fetch('https://api.exchangerates.io/latest?base=USD&symbols=INR', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          timeout: 5000
+        });
+
+        if (response2.ok) {
+          const data = await response2.json();
+          const inrRate = data.rates.INR;
+
+          if (inrRate && inrRate > 0) {
+            usdToInrRate = parseFloat(inrRate.toFixed(2));
+            document.getElementById('exchangeRate').value = usdToInrRate;
+            console.log(`[Exchange Rate] ✅ Updated to ₹${usdToInrRate} per USD (from exchangerates.io, as of ${data.date})`);
+            updateTokenDashboard();
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('[Exchange Rate] Fallback API failed:', error.message);
+      }
+
+      // Both APIs failed, use hardcoded value
+      console.warn('[Exchange Rate] Both APIs failed. Using hardcoded rate: ₹' + usdToInrRate + ' per USD (as of 2026-09-23)');
+      document.getElementById('exchangeRate').value = usdToInrRate;
+      updateTokenDashboard();
+    }
+
+    // ========================================================================
     // DATABASE FUNCTIONS - Load, save, and clear billing data
     // ========================================================================
     async function loadBillingDataFromDB() {
@@ -1723,8 +1784,11 @@
 
         const records = await response.json();
 
-        // Populate billingByDate from database
-        billingByDate = {};
+        // Preserve current memory data (from earlier in session)
+        const existingMemoryData = { ...billingByDate };
+        const existingTokenMetrics = { ...tokenMetrics.v3 };
+
+        // Load from database and merge with memory data
         let totalResumes = 0;
         let totalTokens = 0;
         let totalCost = 0;
@@ -1742,16 +1806,28 @@
           totalCost += parseFloat(record.cost_usd);
         });
 
-        // Update tokenMetrics with database values
+        // Merge with existing memory data (prioritize database, fallback to memory)
+        Object.keys(existingMemoryData).forEach(date => {
+          if (!billingByDate[date]) {
+            // Memory has data for this date that's not in database yet
+            billingByDate[date] = existingMemoryData[date];
+            totalResumes += existingMemoryData[date].resumes;
+            totalTokens += existingMemoryData[date].tokens;
+            totalCost += existingMemoryData[date].cost;
+          }
+        });
+
+        // Update tokenMetrics with merged totals
         tokenMetrics.v3.total_resumes = totalResumes;
         tokenMetrics.v3.total_tokens = totalTokens;
         tokenMetrics.v3.total_cost = totalCost;
 
-        console.log(`[Billing DB] Loaded ${records.length} date records from database`);
+        console.log(`[Billing DB] Loaded ${records.length} records from database, merged with ${Object.keys(existingMemoryData).length} memory records`);
         updateTokenDashboard();
       } catch (error) {
         console.warn('[Billing DB] Could not load data:', error.message);
-        // Continue with empty in-memory object
+        console.log('[Billing DB] Continuing with memory-only data from current session');
+        updateTokenDashboard();
       }
     }
 
