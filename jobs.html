@@ -865,8 +865,9 @@
             <label style="font-size: 12px; color: #6b7280; font-weight: 600;">USD to INR Rate</label>
             <input type="number" id="exchangeRate" step="0.01" value="83.50" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; margin-top: 4px;" onchange="updateExchangeRate()">
           </div>
-          <div style="flex: 2;">
-            <button onclick="downloadBillingCSV()" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">📥 Download Billing (CSV)</button>
+          <div style="flex: 2; display: flex; gap: 8px;">
+            <button onclick="downloadBillingCSV()" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; flex: 1;">📥 Download Billing (CSV)</button>
+            <button onclick="clearBillingData()" style="background: #ef4444; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; flex: 1;">🗑️ Clear Data</button>
           </div>
         </div>
       </div>
@@ -1159,6 +1160,7 @@
       updateUI();
       loadJobs();
       setupBulkFileListener();
+      loadBillingDataFromDB(); // Load billing data from database
     });
 
     function updateUI() {
@@ -1360,6 +1362,9 @@
           billingByDate[today].resumes += 1;
           billingByDate[today].tokens += scoreData._tokens.total;
           billingByDate[today].cost += scoreData._tokens.cost;
+
+          // Save to database
+          saveBillingDataToDB(today, billingByDate[today].resumes, billingByDate[today].tokens, billingByDate[today].cost);
 
           console.log(
             `[Token Tracking] ${version.toUpperCase()} Score - Input: ${scoreData._tokens.input}, Output: ${scoreData._tokens.output}, Total: ${scoreData._tokens.total}, Cost: $${scoreData._tokens.cost}`
@@ -1697,6 +1702,155 @@
       document.body.removeChild(link);
 
       console.log('[Billing] CSV exported successfully');
+    }
+
+    // ========================================================================
+    // DATABASE FUNCTIONS - Load, save, and clear billing data
+    // ========================================================================
+    async function loadBillingDataFromDB() {
+      try {
+        const response = await fetch(
+          SUPABASE_URL + '/rest/v1/billing_records?order=billing_date.desc',
+          {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+          }
+        );
+
+        if (!response.ok) {
+          console.warn('[Billing DB] Table may not exist yet. Using memory-only mode.');
+          return;
+        }
+
+        const records = await response.json();
+
+        // Populate billingByDate from database
+        billingByDate = {};
+        let totalResumes = 0;
+        let totalTokens = 0;
+        let totalCost = 0;
+
+        records.forEach(record => {
+          const dateStr = record.billing_date;
+          billingByDate[dateStr] = {
+            resumes: record.resumes_count,
+            tokens: record.total_tokens,
+            cost: parseFloat(record.cost_usd),
+            timestamp: new Date(record.updated_at)
+          };
+          totalResumes += record.resumes_count;
+          totalTokens += record.total_tokens;
+          totalCost += parseFloat(record.cost_usd);
+        });
+
+        // Update tokenMetrics with database values
+        tokenMetrics.v3.total_resumes = totalResumes;
+        tokenMetrics.v3.total_tokens = totalTokens;
+        tokenMetrics.v3.total_cost = totalCost;
+
+        console.log(`[Billing DB] Loaded ${records.length} date records from database`);
+        updateTokenDashboard();
+      } catch (error) {
+        console.warn('[Billing DB] Could not load data:', error.message);
+        // Continue with empty in-memory object
+      }
+    }
+
+    async function saveBillingDataToDB(date, resumes, tokens, cost) {
+      try {
+        // Check if record exists for this date
+        const check = await fetch(
+          SUPABASE_URL + '/rest/v1/billing_records?billing_date=eq.' + date,
+          {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+          }
+        );
+
+        const existing = await check.json();
+
+        if (existing.length > 0) {
+          // Update existing record
+          const response = await fetch(
+            SUPABASE_URL + '/rest/v1/billing_records?billing_date=eq.' + date,
+            {
+              method: 'PATCH',
+              headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                resumes_count: resumes,
+                total_tokens: tokens,
+                cost_usd: cost,
+                updated_at: new Date().toISOString()
+              })
+            }
+          );
+
+          if (response.ok) {
+            console.log(`[Billing DB] Updated record for ${date}`);
+          }
+        } else {
+          // Insert new record
+          const response = await fetch(
+            SUPABASE_URL + '/rest/v1/billing_records',
+            {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                billing_date: date,
+                resumes_count: resumes,
+                total_tokens: tokens,
+                cost_usd: cost,
+                exchange_rate: usdToInrRate
+              })
+            }
+          );
+
+          if (response.ok) {
+            console.log(`[Billing DB] Inserted new record for ${date}`);
+          }
+        }
+      } catch (error) {
+        console.warn('[Billing DB] Could not save data:', error.message);
+      }
+    }
+
+    async function clearBillingData() {
+      if (!confirm('⚠️ Delete all billing records? This cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          SUPABASE_URL + '/rest/v1/billing_records',
+          {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY
+            }
+          }
+        );
+
+        if (response.ok) {
+          // Clear memory data
+          billingByDate = {};
+          tokenMetrics.v3 = { total_calls: 0, total_tokens: 0, total_cost: 0, total_resumes: 0 };
+          updateTokenDashboard();
+          alert('✅ All billing data cleared successfully');
+          console.log('[Billing DB] All records deleted');
+        } else {
+          alert('❌ Failed to clear billing data');
+        }
+      } catch (error) {
+        console.error('[Billing DB] Error clearing data:', error);
+        alert('Error: ' + error.message);
+      }
     }
 
     async function generateBatchId(jobCode) {
@@ -2118,6 +2272,9 @@
               billingByDate[today].resumes += 1;
               billingByDate[today].tokens += scoreData._tokens.total;
               billingByDate[today].cost += scoreData._tokens.cost;
+
+              // Save to database
+              saveBillingDataToDB(today, billingByDate[today].resumes, billingByDate[today].tokens, billingByDate[today].cost);
 
               console.log(
                 `[Token Tracking] ${version.toUpperCase()} Score - Input: ${scoreData._tokens.input}, Output: ${scoreData._tokens.output}, Total: ${scoreData._tokens.total}, Cost: $${scoreData._tokens.cost}`
