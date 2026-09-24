@@ -753,73 +753,6 @@
       color: white;
     }
     .btn-retry-failed:hover { background-color: #d97706; }
-    /* A/B TESTING STYLES - Token Comparison Dashboard */
-    #tokenComparisonDashboard {
-      background: #f0f4f8;
-      border: 2px solid #3b82f6;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
-      display: none;
-    }
-    #tokenComparisonDashboard h3 {
-      margin-top: 0;
-      color: #1e40af;
-      font-size: 16px;
-    }
-    #tokenComparisonDashboard table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-    #tokenComparisonDashboard thead {
-      background: #e0e7ff;
-      border-bottom: 2px solid #3b82f6;
-    }
-    #tokenComparisonDashboard th {
-      padding: 10px;
-      text-align: left;
-      font-weight: 600;
-    }
-    #tokenComparisonDashboard td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
-    #tokenComparisonDashboard tbody tr:nth-child(2) {
-      background: #f0fdf4;
-    }
-    #tokenComparisonDashboard tbody tr:nth-child(3) {
-      background: #fef2f2;
-      font-weight: 600;
-    }
-    #tokenComparisonDashboard tbody th {
-      text-align: left;
-      color: #374151;
-    }
-    #tokenComparisonDashboard td {
-      text-align: right;
-      font-family: monospace;
-    }
-    #tokenComparisonDashboard td:first-child {
-      text-align: left;
-      font-family: inherit;
-    }
-    #tokenComparisonDashboard .savings {
-      color: #b91c1c;
-    }
-    #tokenComparisonDashboard .cost-positive {
-      color: #dc2626;
-      font-weight: 600;
-    }
-    #tokenComparisonDashboard .cost-positive-green {
-      color: #16a34a;
-      font-weight: 600;
-    }
-    #tokenComparisonDashboard p {
-      margin-top: 12px;
-      font-size: 12px;
-      color: #666;
-    }
     footer {
       text-align: center;
       margin-top: 60px;
@@ -945,46 +878,6 @@
           <div id="candidatesList"></div>
         </div>
 
-        <!-- A/B Testing Token Dashboard -->
-        <div id="tokenComparisonDashboard">
-          <h3>📊 Token Usage Comparison (A/B Test)</h3>
-          <table>
-            <thead>
-              <tr>
-                <th style="padding: 10px; text-align: left; font-weight: 600;">Version</th>
-                <th style="padding: 10px; text-align: center;">Calls</th>
-                <th style="padding: 10px; text-align: right;">Total Tokens</th>
-                <th style="padding: 10px; text-align: right;">Avg/Call</th>
-                <th style="padding: 10px; text-align: right;">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding: 10px; font-weight: 600; color: #374151;">V1 (Baseline)</td>
-                <td id="v1-calls" style="padding: 10px; text-align: center;">-</td>
-                <td id="v1-tokens" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-                <td id="v1-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-                <td id="v1-cost" style="padding: 10px; text-align: right; color: #dc2626; font-weight: 600;">-</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px; font-weight: 600; color: #374151;">V2 (Optimized)</td>
-                <td id="v2-calls" style="padding: 10px; text-align: center;">-</td>
-                <td id="v2-tokens" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-                <td id="v2-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
-                <td id="v2-cost" style="padding: 10px; text-align: right; color: #16a34a; font-weight: 600;">-</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px;">Savings</td>
-                <td style="padding: 10px; text-align: center;">-</td>
-                <td id="savings-tokens" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
-                <td id="savings-percent" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
-                <td id="savings-cost" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>💡 Testing in progress... Upload more resumes to gather data for comparison.</p>
-        </div>
-
         <!-- Progress Section (shown during extraction and scoring) -->
         <div id="bulkProgress" class="progress-section">
           <div class="progress-counter">
@@ -1077,9 +970,9 @@
 
   <script>
     // ========================================================================
-    // A/B TESTING CONFIGURATION - Toggle between v1 (baseline) and v2 (optimized) and V3(service key functions)
+    // A/B TESTING CONFIGURATION - Toggle between v1 (baseline) and v2 (optimized)
     // ========================================================================
-    const USE_OPTIMIZED_FUNCTIONS = true; // CHANGE TO true TO TEST V3
+    const USE_OPTIMIZED_FUNCTIONS = false; // CHANGE TO true TO TEST V2
 
     // Token tracking for comparison
     let tokenMetrics = {
@@ -1088,7 +981,7 @@
     };
 
     // Display A/B testing status in console
-    console.log(`[A/B Testing] Using: ${USE_OPTIMIZED_FUNCTIONS ? 'V3 (service key)' : 'V2 (BASELINE)'}`);
+    console.log(`[A/B Testing] Using: ${USE_OPTIMIZED_FUNCTIONS ? 'V2 (OPTIMIZED)' : 'V1 (BASELINE)'}`);
 
     // ========================================================================
     // CONSTANTS
@@ -1584,53 +1477,6 @@
     }
 
     // ========================================================================
-    // A/B TESTING - Update token dashboard
-    // ========================================================================
-    function updateTokenDashboard() {
-      const dashboard = document.getElementById('tokenComparisonDashboard');
-      const v1 = tokenMetrics.v1;
-      const v2 = tokenMetrics.v2;
-
-      // Only show if we have data
-      if (v1.total_calls === 0 && v2.total_calls === 0) {
-        dashboard.style.display = 'none';
-        return;
-      }
-
-      dashboard.style.display = 'block';
-
-      // Calculate averages
-      const v1Avg = v1.total_calls > 0 ? Math.round(v1.total_tokens / v1.total_calls) : 0;
-      const v2Avg = v2.total_calls > 0 ? Math.round(v2.total_tokens / v2.total_calls) : 0;
-
-      // Calculate savings
-      const tokenSavings = v1.total_tokens - v2.total_tokens;
-      const savingsPercent = v1.total_tokens > 0
-        ? Math.round((tokenSavings / v1.total_tokens) * 100)
-        : 0;
-      const costSavings = v1.total_cost - v2.total_cost;
-
-      // Update V1
-      document.getElementById('v1-calls').textContent = v1.total_calls;
-      document.getElementById('v1-tokens').textContent = v1.total_tokens.toLocaleString();
-      document.getElementById('v1-avg').textContent = v1Avg.toLocaleString();
-      document.getElementById('v1-cost').textContent = `$${v1.total_cost.toFixed(4)}`;
-
-      // Update V2
-      document.getElementById('v2-calls').textContent = v2.total_calls;
-      document.getElementById('v2-tokens').textContent = v2.total_tokens.toLocaleString();
-      document.getElementById('v2-avg').textContent = v2Avg.toLocaleString();
-      document.getElementById('v2-cost').textContent = `$${v2.total_cost.toFixed(4)}`;
-
-      // Update Savings
-      document.getElementById('savings-tokens').textContent =
-        tokenSavings > 0 ? `-${tokenSavings.toLocaleString()}` : '—';
-      document.getElementById('savings-percent').textContent =
-        tokenSavings > 0 ? `-${savingsPercent}%` : '—';
-      document.getElementById('savings-cost').textContent =
-        costSavings > 0 ? `-$${costSavings.toFixed(4)}` : '—';
-    }
-
     async function generateBatchId(jobCode) {
       // Format: BATCH-DDMMYY-###
       const today = new Date();
@@ -2167,9 +2013,6 @@
 
         // Stop timer
         clearInterval(processingTimerInterval);
-
-        // Update token dashboard before showing summary
-        updateTokenDashboard();
 
         // Show summary modal
         showSummaryModal(successCount, errorCount, totalFiles);
