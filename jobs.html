@@ -753,6 +753,73 @@
       color: white;
     }
     .btn-retry-failed:hover { background-color: #d97706; }
+    /* A/B TESTING STYLES - Token Comparison Dashboard */
+    #tokenComparisonDashboard {
+      background: #f0f4f8;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      display: none;
+    }
+    #tokenComparisonDashboard h3 {
+      margin-top: 0;
+      color: #1e40af;
+      font-size: 16px;
+    }
+    #tokenComparisonDashboard table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    #tokenComparisonDashboard thead {
+      background: #e0e7ff;
+      border-bottom: 2px solid #3b82f6;
+    }
+    #tokenComparisonDashboard th {
+      padding: 10px;
+      text-align: left;
+      font-weight: 600;
+    }
+    #tokenComparisonDashboard td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    #tokenComparisonDashboard tbody tr:nth-child(2) {
+      background: #f0fdf4;
+    }
+    #tokenComparisonDashboard tbody tr:nth-child(3) {
+      background: #fef2f2;
+      font-weight: 600;
+    }
+    #tokenComparisonDashboard tbody th {
+      text-align: left;
+      color: #374151;
+    }
+    #tokenComparisonDashboard td {
+      text-align: right;
+      font-family: monospace;
+    }
+    #tokenComparisonDashboard td:first-child {
+      text-align: left;
+      font-family: inherit;
+    }
+    #tokenComparisonDashboard .savings {
+      color: #b91c1c;
+    }
+    #tokenComparisonDashboard .cost-positive {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    #tokenComparisonDashboard .cost-positive-green {
+      color: #16a34a;
+      font-weight: 600;
+    }
+    #tokenComparisonDashboard p {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #666;
+    }
     footer {
       text-align: center;
       margin-top: 60px;
@@ -785,6 +852,46 @@
         <div class="spinner"></div>
         <p>Loading positions...</p>
       </div>
+    </div>
+
+    <!-- A/B Testing Token Dashboard (Standalone) -->
+    <div id="tokenComparisonDashboard">
+      <h3>📊 Token Usage Comparison (A/B Test)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Version</th>
+            <th style="padding: 10px; text-align: center;">Calls</th>
+            <th style="padding: 10px; text-align: right;">Total Tokens</th>
+            <th style="padding: 10px; text-align: right;">Avg/Call</th>
+            <th style="padding: 10px; text-align: right;">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; font-weight: 600; color: #374151;">V2 (Baseline)</td>
+            <td id="v2-calls" style="padding: 10px; text-align: center;">-</td>
+            <td id="v2-tokens" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
+            <td id="v2-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
+            <td id="v2-cost" style="padding: 10px; text-align: right; color: #dc2626; font-weight: 600;">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; font-weight: 600; color: #374151;">V3 (Optimized)</td>
+            <td id="v3-calls" style="padding: 10px; text-align: center;">-</td>
+            <td id="v3-tokens" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
+            <td id="v3-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
+            <td id="v3-cost" style="padding: 10px; text-align: right; color: #16a34a; font-weight: 600;">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px;">Savings (V3 vs V2)</td>
+            <td style="padding: 10px; text-align: center;">-</td>
+            <td id="savings-tokens" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
+            <td id="savings-percent" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
+            <td id="savings-cost" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>💡 A/B testing dashboard - Shows V2 (baseline) vs V3 (optimized SERVICE_ROLE_KEY version) performance metrics collected during bulk uploads.</p>
     </div>
 
     <footer>
@@ -970,18 +1077,18 @@
 
   <script>
     // ========================================================================
-    // A/B TESTING CONFIGURATION - Toggle between v1 (baseline) and v2 (optimized)
+    // A/B TESTING CONFIGURATION - Toggle between V2 (baseline) and V3 (optimized)
     // ========================================================================
-    const USE_OPTIMIZED_FUNCTIONS = false; // CHANGE TO true TO TEST V2
+    const USE_OPTIMIZED_FUNCTIONS = true; // CHANGE TO false TO TEST V2 BASELINE
 
     // Token tracking for comparison
     let tokenMetrics = {
-      v1: { total_calls: 0, total_tokens: 0, total_cost: 0 },
       v2: { total_calls: 0, total_tokens: 0, total_cost: 0 },
+      v3: { total_calls: 0, total_tokens: 0, total_cost: 0 },
     };
 
     // Display A/B testing status in console
-    console.log(`[A/B Testing] Using: ${USE_OPTIMIZED_FUNCTIONS ? 'V2 (OPTIMIZED)' : 'V1 (BASELINE)'}`);
+    console.log(`[A/B Testing] Using: ${USE_OPTIMIZED_FUNCTIONS ? 'V3 (SERVICE_ROLE_KEY + Haiku)' : 'V2 (BASELINE)'}`);
 
     // ========================================================================
     // CONSTANTS
@@ -1125,18 +1232,14 @@
 
     function closeModal() {
       document.getElementById('applicationModal').classList.remove('active');
-      // Clear bulk data
       document.getElementById('bFiles').value = '';
       bulkCandidatesData = {};
       document.getElementById('bulkCandidates').style.display = 'none';
       document.getElementById('candidatesList').innerHTML = '';
-      // Clear single form
       document.getElementById('singleForm').reset();
-      // Clear progress section
       document.getElementById('bulkProgress').classList.remove('show');
       document.getElementById('progressFill').style.width = '0%';
       document.getElementById('progressCounter').textContent = 'Processing 0/0...';
-      // Clear message sections
       document.getElementById('singleMessage').className = 'message';
       document.getElementById('bulkMessage').className = 'message';
     }
@@ -1212,7 +1315,7 @@
         // A/B TESTING - Track tokens from single submission
         // ========================================================================
         if (scoreData._tokens) {
-          const version = USE_OPTIMIZED_FUNCTIONS ? 'v2' : 'v1';
+          const version = USE_OPTIMIZED_FUNCTIONS ? 'v3' : 'v2';
           tokenMetrics[version].total_calls += 1;
           tokenMetrics[version].total_tokens += scoreData._tokens.total;
           tokenMetrics[version].total_cost += scoreData._tokens.cost;
@@ -1225,17 +1328,14 @@
         showMsg(msg, '✅ Application submitted successfully! We will review your resume and get back to you soon.', 'success');
         btn.disabled = false;
 
-        // Generate PDF for HR uploads (in background)
         const isHRUser = localStorage.getItem('hrUser');
         if (isHRUser) {
           console.log('[Individual] Starting PDF generation for HR user');
           setTimeout(async function() {
             try {
               const batchId = await generateBatchId(currentJobCode);
-              console.log('[Individual] Generated batch ID:', batchId);
               const uploadTime = new Date().toLocaleString();
 
-              // Query database to get the full scoring reason + new fields
               let fullReason = scoreData.scoring_reason || 'No reason provided';
               let greenFlags = [];
               let redFlags = [];
@@ -1252,7 +1352,6 @@
                 if (candidateData.length > 0) {
                   if (candidateData[0].scoring_reason) {
                     fullReason = candidateData[0].scoring_reason;
-                    console.log('[Individual] Retrieved full reason from DB');
                   }
                   if (candidateData[0].green_flags) {
                     greenFlags = JSON.parse(candidateData[0].green_flags);
@@ -1280,21 +1379,13 @@
               }];
               const failedData = [];
 
-              console.log('[Individual] Calling generatePDFReport for batch:', batchId);
               const pdfDoc = await generatePDFReport(batchId, currentJobCode, successData, failedData, uploadTime);
-              console.log('[Individual] PDF generation result:', pdfDoc ? 'success' : 'failed');
               if (pdfDoc) {
-                console.log('[Individual] Uploading PDF for batch:', batchId);
                 const pdfUrl = await uploadPDFToSupabase(pdfDoc, batchId, currentJobCode);
-                console.log('[Individual] Upload result:', pdfUrl ? 'success' : 'failed');
                 await saveBatchMetadata(batchId, currentJobCode, currentJobId, 1, 0, pdfUrl, uploadTime);
-                console.log('[Individual] PDF generation completed:', batchId);
-              } else {
-                console.error('[Individual] PDF generation returned null');
               }
             } catch (pdfErr) {
               console.error('[Individual] PDF generation error:', pdfErr);
-              console.error('[Individual] Stack:', pdfErr.stack);
             }
           }, 500);
         }
@@ -1323,10 +1414,7 @@
         candidatesList.innerHTML = '';
         bulkCandidatesData = {};
 
-        // Show progress section during extraction
         progressSection.classList.add('show');
-
-        // Initialize progress
         processingStartTime = Date.now();
         processingTimerInterval = setInterval(updateProcessingTimer, 1000);
         updateProcessingTimer();
@@ -1336,7 +1424,6 @@
             const file = files[i];
             const processed = i + 1;
 
-            // Update progress counter
             document.getElementById('progressCounter').textContent = 'Extracting ' + processed + '/' + files.length + '...';
             const progressPercent = (processed / files.length) * 100;
             document.getElementById('progressFill').style.width = progressPercent + '%';
@@ -1344,7 +1431,6 @@
             const b64 = await toBase64(file);
             const fileExt = file.name.split('.').pop().toLowerCase();
 
-            // Try conversion with retry logic
             let conv = null;
             let lastError = null;
             let text = '';
@@ -1366,7 +1452,6 @@
                 const errData = await conv.json().catch(() => ({}));
                 lastError = errData.error || errData.message || 'Conversion failed';
 
-                // Wait before retry (exponential backoff)
                 if (retry < 2) await new Promise(r => setTimeout(r, 1000 * (retry + 1)));
               } catch (e) {
                 lastError = e.message;
@@ -1374,10 +1459,8 @@
               }
             }
 
-            // Use fallback if Railway converter fails
             if (!text) {
               try {
-                console.log('Railway converter failed, trying fallback for: ' + file.name);
                 const fallback = await fetch(FALLBACK_PDF_EXTRACTOR, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
@@ -1390,7 +1473,6 @@
 
                 const fallbackData = await fallback.json();
                 text = fallbackData.text || '';
-                console.log('Fallback extraction succeeded for: ' + file.name);
               } catch (fallbackErr) {
                 throw new Error('Could not extract text: ' + (lastError || fallbackErr.message));
               }
@@ -1409,7 +1491,7 @@
             // A/B TESTING - Track extract tokens during bulk file processing
             // ========================================================================
             if (extracted._tokens) {
-              const version = USE_OPTIMIZED_FUNCTIONS ? 'v2' : 'v1';
+              const version = USE_OPTIMIZED_FUNCTIONS ? 'v3' : 'v2';
               tokenMetrics[version].total_calls += 1;
               tokenMetrics[version].total_tokens += extracted._tokens.total;
               tokenMetrics[version].total_cost += extracted._tokens.cost;
@@ -1440,7 +1522,6 @@
           }
         }
 
-        // Hide progress section after extraction
         clearInterval(processingTimerInterval);
         progressSection.classList.remove('show');
         renderBulkCandidates();
@@ -1477,15 +1558,60 @@
     }
 
     // ========================================================================
+    // A/B TESTING - Update token dashboard
+    // ========================================================================
+    function updateTokenDashboard() {
+      const dashboard = document.getElementById('tokenComparisonDashboard');
+      const v2 = tokenMetrics.v2;
+      const v3 = tokenMetrics.v3;
+
+      // Only show if we have data
+      if (v2.total_calls === 0 && v3.total_calls === 0) {
+        dashboard.style.display = 'none';
+        return;
+      }
+
+      dashboard.style.display = 'block';
+
+      // Calculate averages
+      const v2Avg = v2.total_calls > 0 ? Math.round(v2.total_tokens / v2.total_calls) : 0;
+      const v3Avg = v3.total_calls > 0 ? Math.round(v3.total_tokens / v3.total_calls) : 0;
+
+      // Calculate savings (V3 compared to V2)
+      const tokenSavings = v2.total_tokens - v3.total_tokens;
+      const savingsPercent = v2.total_tokens > 0
+        ? Math.round((tokenSavings / v2.total_tokens) * 100)
+        : 0;
+      const costSavings = v2.total_cost - v3.total_cost;
+
+      // Update V2
+      document.getElementById('v2-calls').textContent = v2.total_calls;
+      document.getElementById('v2-tokens').textContent = v2.total_tokens.toLocaleString();
+      document.getElementById('v2-avg').textContent = v2Avg.toLocaleString();
+      document.getElementById('v2-cost').textContent = `$${v2.total_cost.toFixed(4)}`;
+
+      // Update V3
+      document.getElementById('v3-calls').textContent = v3.total_calls;
+      document.getElementById('v3-tokens').textContent = v3.total_tokens.toLocaleString();
+      document.getElementById('v3-avg').textContent = v3Avg.toLocaleString();
+      document.getElementById('v3-cost').textContent = `$${v3.total_cost.toFixed(4)}`;
+
+      // Update Savings
+      document.getElementById('savings-tokens').textContent =
+        tokenSavings > 0 ? `-${tokenSavings.toLocaleString()}` : (tokenSavings < 0 ? `+${Math.abs(tokenSavings).toLocaleString()}` : '—');
+      document.getElementById('savings-percent').textContent =
+        tokenSavings > 0 ? `-${savingsPercent}%` : (tokenSavings < 0 ? `+${Math.abs(savingsPercent)}%` : '—');
+      document.getElementById('savings-cost').textContent =
+        costSavings > 0 ? `-$${costSavings.toFixed(4)}` : (costSavings < 0 ? `+$${Math.abs(costSavings).toFixed(4)}` : '—');
+    }
+
     async function generateBatchId(jobCode) {
-      // Format: BATCH-DDMMYY-###
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = String(today.getFullYear()).slice(-2);
       const dateStr = day + month + year;
 
-      // Get today's batch count from localStorage
       const batchKey = 'batch_count_' + dateStr;
       let count = parseInt(localStorage.getItem(batchKey) || '0', 10);
       count++;
@@ -1497,39 +1623,32 @@
 
     async function generatePDFReport(batchId, jobCode, successfulCandidates, failedCandidates, uploadTime) {
       try {
-        console.log('[PDF] Starting PDF generation for batch:', batchId);
-        // Use jsPDF from window.jspdf
         const { jsPDF } = window.jspdf;
         if (!jsPDF) {
           console.error('[PDF] jsPDF library not loaded');
           return null;
         }
         const doc = new jsPDF();
-        console.log('[PDF] PDF document created');
 
-        // Set fonts and colors
-        const primaryColor = [59, 130, 246]; // #3b82f6
-        const successColor = [22, 163, 74]; // #16a346
-        const failColor = [220, 38, 38]; // #dc2626
-        const textColor = [31, 41, 55]; // #1f2937
-        const lightColor = [107, 114, 128]; // #6b7280
-        const greenColor = [16, 185, 129]; // #10b981
-        const redColor = [239, 68, 68]; // #ef4444
+        const primaryColor = [59, 130, 246];
+        const successColor = [22, 163, 74];
+        const failColor = [220, 38, 38];
+        const textColor = [31, 41, 55];
+        const lightColor = [107, 114, 128];
+        const greenColor = [16, 185, 129];
+        const redColor = [239, 68, 68];
 
-        // Header section
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 12;
         const lineSpacing = 4;
         let yPos = margin;
 
-        // Batch ID and Title
         doc.setFontSize(18);
         doc.setTextColor(...primaryColor);
         doc.text('BATCH UPLOAD REPORT', margin, yPos);
         yPos += 8;
 
-        // Batch Details
         doc.setFontSize(9);
         doc.setTextColor(...textColor);
         doc.text('Batch ID: ' + batchId, margin, yPos);
@@ -1539,7 +1658,6 @@
         doc.text('Upload Date & Time: ' + uploadTime, margin, yPos);
         yPos += 8;
 
-        // Summary Statistics
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.text('Summary', margin, yPos);
@@ -1557,7 +1675,6 @@
         doc.text('Total: ' + (successfulCandidates.length + failedCandidates.length), margin, yPos);
         yPos += 10;
 
-        // Part 1: Successful Candidates
         if (successfulCandidates.length > 0) {
           doc.setFontSize(11);
           doc.setFont(undefined, 'bold');
@@ -1569,28 +1686,23 @@
           doc.setFont(undefined, 'normal');
           doc.setTextColor(...textColor);
 
-          // Add each successful candidate
           successfulCandidates.forEach(function(candidate, index) {
-            // Check if we need a new page
             if (yPos > pageHeight - margin - 40) {
               doc.addPage();
               yPos = margin;
             }
 
-            // Dashed line separator
             doc.setTextColor(...lightColor);
             const dashLine = '-'.repeat(90);
             doc.text(dashLine, margin, yPos);
             yPos += 4;
 
-            // Candidate header
             doc.setTextColor(...textColor);
             doc.setFontSize(9);
             doc.setFont(undefined, 'bold');
             doc.text('Candidate ' + (index + 1), margin, yPos);
             yPos += 4;
 
-            // Candidate details
             doc.setFontSize(8);
             doc.setFont(undefined, 'normal');
             doc.text('Name: ' + (candidate.name || 'N/A'), margin, yPos);
@@ -1600,12 +1712,10 @@
             doc.text('Mobile number: ' + (candidate.phone || 'N/A'), margin, yPos);
             yPos += lineSpacing;
 
-            // Score
             doc.setFont(undefined, 'bold');
             doc.text('Score: ' + (candidate.score || 'N/A'), margin, yPos);
             yPos += lineSpacing;
 
-            // Reason text with word wrapping
             doc.setFont(undefined, 'normal');
             const reasonText = candidate.reason || 'No reason provided';
             const reasonLines = doc.splitTextToSize('Reason: ' + reasonText, pageWidth - margin * 2 - 2);
@@ -1618,7 +1728,6 @@
             doc.text(reasonLines, margin, yPos);
             yPos += reasonLines.length * lineSpacing + 2;
 
-            // Green Flags
             if (candidate.green_flags && candidate.green_flags.length > 0) {
               doc.setFont(undefined, 'bold');
               doc.setTextColor(...greenColor);
@@ -1639,7 +1748,6 @@
               yPos += 2;
             }
 
-            // Red Flags
             if (candidate.red_flags && candidate.red_flags.length > 0) {
               doc.setFont(undefined, 'bold');
               doc.setTextColor(...redColor);
@@ -1660,7 +1768,6 @@
               yPos += 2;
             }
 
-            // Interview Questions
             if (candidate.interview_questions && candidate.interview_questions.length > 0) {
               doc.setFont(undefined, 'bold');
               doc.setTextColor(...primaryColor);
@@ -1682,7 +1789,6 @@
               yPos += 4;
             }
 
-            // Closing dashed line
             doc.setTextColor(...lightColor);
             doc.setFontSize(8);
             doc.text(dashLine, margin, yPos);
@@ -1690,7 +1796,6 @@
           });
         }
 
-        // Part 2: Failed Candidates
         if (failedCandidates.length > 0) {
           if (yPos > pageHeight - margin - 40) {
             doc.addPage();
@@ -1713,20 +1818,17 @@
               yPos = margin;
             }
 
-            // Dashed line separator
             doc.setTextColor(...lightColor);
             const dashLine = '-'.repeat(90);
             doc.text(dashLine, margin, yPos);
             yPos += 4;
 
-            // Candidate header
             doc.setTextColor(...textColor);
             doc.setFontSize(9);
             doc.setFont(undefined, 'bold');
             doc.text('Candidate ' + (successfulCandidates.length + index + 1), margin, yPos);
             yPos += 4;
 
-            // Candidate details
             doc.setFontSize(8);
             doc.setFont(undefined, 'normal');
             doc.text('Name: ' + (candidate.name || 'N/A'), margin, yPos);
@@ -1736,22 +1838,18 @@
             doc.text('Mobile number: ' + (candidate.phone || 'N/A'), margin, yPos);
             yPos += lineSpacing;
 
-            // Reason for rejection
             const reasonText = candidate.reason || 'No reason provided';
             const reasonLines = doc.splitTextToSize('Reason: ' + reasonText, pageWidth - margin * 2 - 2);
             doc.text(reasonLines, margin, yPos);
             yPos += reasonLines.length * lineSpacing + 4;
 
-            // Closing dashed line
             doc.setTextColor(...lightColor);
             doc.text(dashLine, margin, yPos);
             yPos += 6;
           });
         }
 
-        // Add footer with page numbers
         const totalPages = doc.internal.pages.length - 1;
-        console.log('[PDF] Adding footers to', totalPages, 'pages');
         for (let i = 1; i <= totalPages; i++) {
           doc.setPage(i);
           doc.setFontSize(7);
@@ -1761,30 +1859,18 @@
           doc.text('Page ' + i + ' of ' + totalPages, pageWidth - margin - 12, footerY);
         }
 
-        console.log('[PDF] PDF generation complete for batch:', batchId);
         return doc;
       } catch (err) {
-        console.error('[PDF] PDF generation error for batch', batchId, ':', err);
-        console.error('[PDF] Stack:', err.stack);
+        console.error('[PDF] PDF generation error:', err);
         return null;
       }
     }
 
     async function uploadPDFToSupabase(pdfDoc, batchId, jobCode) {
       try {
-        console.log('[Upload] Starting PDF upload for batch:', batchId);
-        if (!pdfDoc) {
-          console.error('[Upload] PDF document is null');
-          return null;
-        }
-
-        // Generate PDF as blob
         const pdfBlob = pdfDoc.output('blob');
-        console.log('[Upload] PDF blob generated, size:', pdfBlob.size, 'bytes');
         const fileName = batchId + '_' + jobCode + '.pdf';
 
-        console.log('[Upload] Uploading to Supabase storage:', fileName);
-        // Upload to Supabase storage
         const uploadResponse = await fetch(
           SUPABASE_URL + '/storage/v1/object/batch-reports/' + fileName,
           {
@@ -1794,28 +1880,19 @@
           }
         );
 
-        console.log('[Upload] Upload response status:', uploadResponse.status);
-
         if (uploadResponse.ok) {
           const pdfUrl = SUPABASE_URL + '/storage/v1/object/public/batch-reports/' + fileName;
-          console.log('[Upload] Upload successful, PDF URL:', pdfUrl);
           return pdfUrl;
-        } else {
-          const errText = await uploadResponse.text();
-          console.error('[Upload] Upload failed:', uploadResponse.status, errText);
-          return null;
         }
+        return null;
       } catch (err) {
         console.error('[Upload] PDF upload error:', err);
-        console.error('[Upload] Stack:', err.stack);
         return null;
       }
     }
 
     async function saveBatchMetadata(batchId, jobCode, jobId, successCount, failCount, pdfUrl, uploadTime) {
       try {
-        console.log('[DB] Saving batch metadata for:', batchId);
-        // Save batch metadata to Supabase batch_uploads table
         const batchData = {
           batch_id: batchId,
           job_code: jobCode,
@@ -1828,7 +1905,6 @@
           created_at: new Date().toISOString()
         };
 
-        console.log('[DB] Batch data:', batchData);
         const response = await fetch(SUPABASE_URL + '/rest/v1/batch_uploads', {
           method: 'POST',
           headers: {
@@ -1839,18 +1915,9 @@
           body: JSON.stringify(batchData)
         });
 
-        console.log('[DB] Database response status:', response.status);
-        if (response.ok) {
-          console.log('[DB] Batch metadata saved successfully');
-          return true;
-        } else {
-          const errText = await response.text();
-          console.error('[DB] Save failed:', response.status, errText);
-          return false;
-        }
+        return response.ok;
       } catch (err) {
         console.error('[DB] Batch metadata save error:', err);
-        console.error('[DB] Stack:', err.stack);
         return false;
       }
     }
@@ -1867,12 +1934,10 @@
         return;
       }
 
-      // Hide old message and show progress
       msg.style.display = 'none';
       progressSection.classList.add('show');
       btn.disabled = true;
 
-      // Initialize tracking
       processingStartTime = Date.now();
       failedResumes = [];
       currentBatchData.successful = [];
@@ -1880,14 +1945,12 @@
       let successCount = 0, errorCount = 0;
       const totalFiles = files.length;
 
-      // Generate batch ID
       const batchId = await generateBatchId(currentJobCode);
       currentBatchData.jobCode = currentJobCode;
       currentBatchData.jobId = currentJobId;
       const uploadTime = new Date().toLocaleString();
       currentBatchData.uploadTime = uploadTime;
 
-      // Start timer update
       processingTimerInterval = setInterval(updateProcessingTimer, 1000);
       updateProcessingTimer();
 
@@ -1898,7 +1961,6 @@
           const email = document.querySelector('.bulk-email-' + i).value.trim();
           const phone = document.querySelector('.bulk-phone-' + i).value || '';
 
-          // Update progress counter
           const processed = i + 1;
           document.getElementById('progressCounter').textContent = 'Processing ' + processed + '/' + totalFiles + '...';
           const progressPercent = (processed / totalFiles) * 100;
@@ -1943,14 +2005,12 @@
             }
 
             const scoreData = await score.json();
-            console.log('[Scoring] Response data:', scoreData);
-            console.log('[Scoring] Available fields:', Object.keys(scoreData));
 
             // ========================================================================
             // A/B TESTING - Track score tokens during bulk submit
             // ========================================================================
             if (scoreData._tokens) {
-              const version = USE_OPTIMIZED_FUNCTIONS ? 'v2' : 'v1';
+              const version = USE_OPTIMIZED_FUNCTIONS ? 'v3' : 'v2';
               tokenMetrics[version].total_calls += 1;
               tokenMetrics[version].total_tokens += scoreData._tokens.total;
               tokenMetrics[version].total_cost += scoreData._tokens.cost;
@@ -1960,7 +2020,6 @@
               );
             }
 
-            // Query database to get the full scoring reason + new fields
             let fullReason = scoreData.scoring_reason || scoreData.reason || 'No reason provided';
             let greenFlags = [];
             let redFlags = [];
@@ -1977,7 +2036,6 @@
               if (candidateData.length > 0) {
                 if (candidateData[0].scoring_reason) {
                   fullReason = candidateData[0].scoring_reason;
-                  console.log('[Scoring] Retrieved full reason from DB');
                 }
                 if (candidateData[0].green_flags) {
                   greenFlags = JSON.parse(candidateData[0].green_flags);
@@ -1990,7 +2048,7 @@
                 }
               }
             } catch (err) {
-              console.log('[Scoring] Could not fetch full data from DB, using API response');
+              console.log('[Scoring] Could not fetch full data from DB');
             }
 
             successCount++;
@@ -2011,25 +2069,20 @@
           }
         }
 
-        // Stop timer
         clearInterval(processingTimerInterval);
+
+        // Update token dashboard before showing summary
+        updateTokenDashboard();
 
         // Show summary modal
         showSummaryModal(successCount, errorCount, totalFiles);
 
-        // Generate and upload PDF in background (don't block user)
+        // Generate and upload PDF in background
         setTimeout(async function() {
-          console.log('[Background] Starting PDF generation for batch:', batchId);
           const pdfDoc = await generatePDFReport(batchId, currentJobCode, currentBatchData.successful, currentBatchData.failed, uploadTime);
-          console.log('[Background] PDF generation result:', pdfDoc ? 'success' : 'failed');
           if (pdfDoc) {
-            console.log('[Background] Starting upload for batch:', batchId);
             const pdfUrl = await uploadPDFToSupabase(pdfDoc, batchId, currentJobCode);
-            console.log('[Background] Upload result:', pdfUrl ? 'success' : 'failed');
             await saveBatchMetadata(batchId, currentJobCode, currentJobId, successCount, errorCount, pdfUrl, uploadTime);
-            console.log('[Background] Batch report completed:', batchId);
-          } else {
-            console.error('[Background] PDF generation failed, skipping upload and DB save');
           }
         }, 500);
 
@@ -2057,7 +2110,6 @@
       document.getElementById('statFailed').textContent = errorCount;
       document.getElementById('statTotal').textContent = totalFiles;
 
-      // Show processing time
       clearInterval(processingTimerInterval);
       const elapsed = Math.floor((Date.now() - processingStartTime) / 1000);
       const minutes = Math.floor(elapsed / 60);
@@ -2065,7 +2117,6 @@
       const timeStr = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
       document.getElementById('summaryTime').textContent = timeStr;
 
-      // Show failed resumes if any
       const failedSection = document.getElementById('failedResumes');
       if (failedResumes.length > 0) {
         let failedHtml = '<div class="failed-section"><h3>❌ ' + failedResumes.length + ' Failed Resumes:</h3>';
@@ -2075,7 +2126,6 @@
         failedHtml += '</div>';
         failedSection.innerHTML = failedHtml;
 
-        // Save failed resumes to localStorage for later review
         const allFailed = JSON.parse(localStorage.getItem('rejectedResumes') || '[]');
         const timestamp = new Date().toLocaleString();
         const batch = {
@@ -2162,7 +2212,6 @@
       bulkCandidatesData[currentResumeModalCandidateIndex].email = email;
       bulkCandidatesData[currentResumeModalCandidateIndex].phone = phone;
 
-      // Update the UI
       document.querySelector('.bulk-name-' + currentResumeModalCandidateIndex).value = name;
       document.querySelector('.bulk-email-' + currentResumeModalCandidateIndex).value = email;
       document.querySelector('.bulk-phone-' + currentResumeModalCandidateIndex).value = phone;
