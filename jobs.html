@@ -760,7 +760,7 @@
       border-radius: 8px;
       padding: 20px;
       margin: 20px 0;
-      display: none;
+      display: block;
     }
     #tokenComparisonDashboard h3 {
       margin-top: 0;
@@ -856,15 +856,35 @@
 
     <!-- A/B Testing Token Dashboard (Standalone) -->
     <div id="tokenComparisonDashboard">
-      <h3>📊 Token Usage Comparison (A/B Test)</h3>
+      <h3>📊 Token Usage & Billing Dashboard</h3>
+
+      <!-- Billing Summary Section -->
+      <div style="background: white; padding: 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Resumes Processed</div>
+            <div id="total-resumes" style="font-size: 28px; font-weight: 700; color: #3b82f6; margin-top: 4px;">-</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Cost (All Versions)</div>
+            <div id="total-cost-all" style="font-size: 28px; font-weight: 700; color: #dc2626; margin-top: 4px;">-</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Cost Savings</div>
+            <div id="total-savings-cost" style="font-size: 28px; font-weight: 700; color: #16a34a; margin-top: 4px;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
       <table>
         <thead>
           <tr>
             <th style="padding: 10px; text-align: left; font-weight: 600;">Version</th>
-            <th style="padding: 10px; text-align: center;">Calls</th>
+            <th style="padding: 10px; text-align: center;">Resumes</th>
             <th style="padding: 10px; text-align: right;">Total Tokens</th>
-            <th style="padding: 10px; text-align: right;">Avg/Call</th>
-            <th style="padding: 10px; text-align: right;">Cost</th>
+            <th style="padding: 10px; text-align: right;">Avg Tokens/Resume</th>
+            <th style="padding: 10px; text-align: right;">Total Cost</th>
           </tr>
         </thead>
         <tbody>
@@ -882,16 +902,18 @@
             <td id="v3-avg" style="padding: 10px; text-align: right; font-family: monospace;">-</td>
             <td id="v3-cost" style="padding: 10px; text-align: right; color: #16a34a; font-weight: 600;">-</td>
           </tr>
-          <tr>
-            <td style="padding: 10px;">Savings (V3 vs V2)</td>
+          <tr style="background: #f9fafb;">
+            <td style="padding: 10px; font-weight: 600; color: #374151;">💰 Cost Difference</td>
             <td style="padding: 10px; text-align: center;">-</td>
-            <td id="savings-tokens" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
-            <td id="savings-percent" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
-            <td id="savings-cost" style="padding: 10px; text-align: right; color: #b91c1c;">-</td>
+            <td id="savings-tokens" style="padding: 10px; text-align: right; color: #b91c1c; font-family: monospace;">-</td>
+            <td id="savings-percent" style="padding: 10px; text-align: right; color: #b91c1c; font-weight: 600;">-</td>
+            <td id="savings-cost" style="padding: 10px; text-align: right; color: #16a34a; font-weight: 600;">-</td>
           </tr>
         </tbody>
       </table>
-      <p>💡 A/B testing dashboard - Shows V2 (baseline) vs V3 (optimized SERVICE_ROLE_KEY version) performance metrics collected during bulk uploads.</p>
+      <p style="margin-top: 16px; font-size: 13px; color: #666; background: #fef9e7; padding: 12px; border-radius: 4px; border-left: 3px solid #f59e0b;">
+        📋 <strong>Billing Summary:</strong> This dashboard tracks API usage and costs for V2 (baseline) vs V3 (optimized with SERVICE_ROLE_KEY). Use the "Total Cost" column for billing. Cost savings show how much V3 reduces expenses compared to V2.
+      </p>
     </div>
 
     <footer>
@@ -1565,13 +1587,17 @@
       const v2 = tokenMetrics.v2;
       const v3 = tokenMetrics.v3;
 
-      // Only show if we have data
-      if (v2.total_calls === 0 && v3.total_calls === 0) {
-        dashboard.style.display = 'none';
-        return;
-      }
+      // Calculate totals for billing
+      const totalResumes = v2.total_calls + v3.total_calls;
+      const totalCostAll = v2.total_cost + v3.total_cost;
+      const costSavings = v2.total_cost - v3.total_cost;
 
-      dashboard.style.display = 'block';
+      // Update Billing Summary
+      document.getElementById('total-resumes').textContent = totalResumes > 0 ? totalResumes : '-';
+      document.getElementById('total-cost-all').textContent = totalResumes > 0 ? `$${totalCostAll.toFixed(4)}` : '-';
+      document.getElementById('total-savings-cost').textContent = totalResumes > 0
+        ? (costSavings > 0 ? `-$${costSavings.toFixed(4)}` : (costSavings < 0 ? `+$${Math.abs(costSavings).toFixed(4)}` : '$0.0000'))
+        : '-';
 
       // Calculate averages
       const v2Avg = v2.total_calls > 0 ? Math.round(v2.total_tokens / v2.total_calls) : 0;
@@ -1582,7 +1608,6 @@
       const savingsPercent = v2.total_tokens > 0
         ? Math.round((tokenSavings / v2.total_tokens) * 100)
         : 0;
-      const costSavings = v2.total_cost - v3.total_cost;
 
       // Update V2
       document.getElementById('v2-calls').textContent = v2.total_calls;
